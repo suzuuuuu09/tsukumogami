@@ -1,0 +1,217 @@
+name: Terraform Plan
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+
+concurrency:
+  group: terraform-plan-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  terraform-plan:
+    name: Terraform Plan
+    runs-on: ubuntu-latest
+    env:
+      TF_IN_AUTOMATION: true
+      TF_WORKING_DIR: infra
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.TF_VAR_AWS_REGION || 'ap-northeast-1' }}
+
+      - name: Export Terraform variables from secrets
+        env:
+          SECRET_AWS_REGION: ${{ secrets.TF_VAR_AWS_REGION }}
+          SECRET_PROJECT_NAME: ${{ secrets.TF_VAR_PROJECT_NAME }}
+          SECRET_ENVIRONMENT: ${{ secrets.TF_VAR_ENVIRONMENT }}
+          SECRET_VPC_CIDR: ${{ secrets.TF_VAR_VPC_CIDR }}
+          SECRET_PUBLIC_SUBNET_CIDRS: ${{ secrets.TF_VAR_PUBLIC_SUBNET_CIDRS }}
+          SECRET_PRIVATE_SUBNET_CIDRS: ${{ secrets.TF_VAR_PRIVATE_SUBNET_CIDRS }}
+          SECRET_DB_NAME: ${{ secrets.TF_VAR_DB_NAME }}
+          SECRET_DB_USERNAME: ${{ secrets.TF_VAR_DB_USERNAME }}
+          SECRET_DB_PASSWORD: ${{ secrets.TF_VAR_DB_PASSWORD }}
+          SECRET_YAHOO_APP_ID: ${{ secrets.TF_VAR_YAHOO_APP_ID }}
+          SECRET_GEMINI_API_KEY: ${{ secrets.TF_VAR_GEMINI_API_KEY }}
+          SECRET_GITHUB_OWNER: ${{ secrets.TF_VAR_GITHUB_OWNER }}
+          SECRET_GITHUB_REPO: ${{ secrets.TF_VAR_GITHUB_REPO }}
+          SECRET_PIPELINE_BRANCH: ${{ secrets.TF_VAR_PIPELINE_BRANCH }}
+          SECRET_CODESTAR_CONNECTION_NAME: ${{ secrets.TF_VAR_CODESTAR_CONNECTION_NAME }}
+          SECRET_TAGS: ${{ secrets.TF_VAR_TAGS }}
+        run: |
+          export_if_set() {
+            key="$1"
+            value="$2"
+            if [ -n "$value" ]; then
+              printf '%s=%s\n' "$key" "$value" >> "$GITHUB_ENV"
+            fi
+          }
+
+          export_if_set TF_VAR_aws_region "$SECRET_AWS_REGION"
+          export_if_set TF_VAR_project_name "$SECRET_PROJECT_NAME"
+          export_if_set TF_VAR_environment "$SECRET_ENVIRONMENT"
+          export_if_set TF_VAR_vpc_cidr "$SECRET_VPC_CIDR"
+          export_if_set TF_VAR_public_subnet_cidrs "$SECRET_PUBLIC_SUBNET_CIDRS"
+          export_if_set TF_VAR_private_subnet_cidrs "$SECRET_PRIVATE_SUBNET_CIDRS"
+          export_if_set TF_VAR_db_name "$SECRET_DB_NAME"
+          export_if_set TF_VAR_db_username "$SECRET_DB_USERNAME"
+          export_if_set TF_VAR_db_password "$SECRET_DB_PASSWORD"
+          export_if_set TF_VAR_yahoo_app_id "$SECRET_YAHOO_APP_ID"
+          export_if_set TF_VAR_gemini_api_key "$SECRET_GEMINI_API_KEY"
+          export_if_set TF_VAR_github_owner "$SECRET_GITHUB_OWNER"
+          export_if_set TF_VAR_github_repo "$SECRET_GITHUB_REPO"
+          export_if_set TF_VAR_pipeline_branch "$SECRET_PIPELINE_BRANCH"
+          export_if_set TF_VAR_codestar_connection_name "$SECRET_CODESTAR_CONNECTION_NAME"
+          export_if_set TF_VAR_tags "$SECRET_TAGS"
+
+      - name: Terraform fmt
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform fmt -check -recursive
+
+      - name: Terraform init
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform init -input=false
+
+      - name: Terraform validate
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform validate
+
+      - name: Terraform plan
+        id: plan
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        shell: bash
+        run: |
+          set +e
+          terraform plan \
+            -input=false \
+            -no-color \
+            -detailed-exitcode \
+            -out=tfplan > plan_stdout.txt
+          exit_code=$?
+          set -e
+
+          if [ "$exit_code" -eq 1 ]; then
+            cat plan_stdout.txt
+            exit 1
+          fi
+
+          echo "exit_code=$exit_code" >> "$GITHUB_OUTPUT"
+          terraform show -no-color tfplan > plan.txt
+          terraform show -json tfplan > plan.json
+
+      - name: Summarize plan
+        id: summarize
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        shell: bash
+        run: |
+          if [ "${{ steps.plan.outputs.exit_code }}" = "0" ]; then
+            {
+              echo "summary<<EOF"
+              echo "No infrastructure changes."
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          create_count=$(jq '[.resource_changes[]? | select(.change.actions == ["create"])] | length' plan.json)
+          update_count=$(jq '[.resource_changes[]? | select(.change.actions == ["update"])] | length' plan.json)
+          delete_count=$(jq '[.resource_changes[]? | select(.change.actions == ["delete"])] | length' plan.json)
+          replace_count=$(jq '[.resource_changes[]? | select(.change.actions == ["create","delete"] or .change.actions == ["delete","create"])] | length' plan.json)
+          resource_lines=$(jq -r '
+            def action_name:
+              if .change.actions == ["create"] then "create"
+              elif .change.actions == ["update"] then "update"
+              elif .change.actions == ["delete"] then "delete"
+              elif .change.actions == ["create","delete"] or .change.actions == ["delete","create"] then "replace"
+              else (.change.actions | join("/"))
+              end;
+            [.resource_changes[]? | "- `\(.address)` : \(action_name)"] | join("\n")
+          ' plan.json)
+
+          {
+            echo "summary<<EOF"
+            echo "Create: $create_count"
+            echo "Update: $update_count"
+            echo "Delete: $delete_count"
+            echo "Replace: $replace_count"
+            echo
+            if [ -n "$resource_lines" ]; then
+              echo "$resource_lines"
+            fi
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Add plan to job summary
+        shell: bash
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: |
+          {
+            echo "## Terraform plan"
+            echo
+            echo "${{ steps.summarize.outputs.summary }}"
+            echo
+            echo "<details><summary>Raw plan</summary>"
+            echo
+            echo '```terraform'
+            sed -n '1,300p' plan.txt
+            echo '```'
+            echo "</details>"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Comment plan on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        env:
+          PLAN_SUMMARY: ${{ steps.summarize.outputs.summary }}
+        with:
+          script: |
+            const marker = '<!-- terraform-plan-comment -->';
+            const body = `${marker}
+            ## Terraform plan
+
+            ${process.env.PLAN_SUMMARY}
+
+            Workflow run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existing = comments.find((comment) =>
+              comment.user.type === 'Bot' && comment.body.includes(marker)
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }

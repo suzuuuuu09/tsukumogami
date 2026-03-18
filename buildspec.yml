@@ -1,0 +1,31 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region "$AWS_DEFAULT_REGION" | docker login --username AWS --password-stdin "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com"
+      - COMMIT_HASH=$(echo "$CODEBUILD_RESOLVED_SOURCE_VERSION" | cut -c 1-7)
+      - IMAGE_TAG=${COMMIT_HASH:=latest}
+      - echo Using image tag "$IMAGE_TAG"
+  build:
+    commands:
+      - echo Building backend image...
+      - docker build -f backend/Dockerfile -t "$BACKEND_ECR_URI:$IMAGE_TAG" -t "$BACKEND_ECR_URI:latest" ./backend
+      - echo Building frontend image...
+      - docker build -f frontend/Dockerfile --build-arg VITE_API_BASE="$FRONTEND_API_BASE" -t "$FRONTEND_ECR_URI:$IMAGE_TAG" -t "$FRONTEND_ECR_URI:latest" ./frontend
+  post_build:
+    commands:
+      - echo Pushing backend image...
+      - docker push "$BACKEND_ECR_URI:$IMAGE_TAG"
+      - docker push "$BACKEND_ECR_URI:latest"
+      - echo Pushing frontend image...
+      - docker push "$FRONTEND_ECR_URI:$IMAGE_TAG"
+      - docker push "$FRONTEND_ECR_URI:latest"
+      - printf '[{"name":"backend","imageUri":"%s"}]' "$BACKEND_ECR_URI:$IMAGE_TAG" > backend-imagedefinitions.json
+      - printf '[{"name":"frontend","imageUri":"%s"}]' "$FRONTEND_ECR_URI:$IMAGE_TAG" > frontend-imagedefinitions.json
+
+artifacts:
+  files:
+    - backend-imagedefinitions.json
+    - frontend-imagedefinitions.json

@@ -1,0 +1,18 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: tsukumogami-backend
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./backend:/app
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: tsukumogami-frontend
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"

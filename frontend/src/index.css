@@ -1,0 +1,30 @@
+@import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700;800&display=swap');
+
+:root {
+  /* モノノ怪風の極彩色パレット */
+  --sumi: #1a1515;      /* 墨黒 */
+  --shu: #cc3528;       /* 朱色（血・鳥居） */
+  --kin: #dcb354;       /* 鈍金（装飾） */
+  --washi: #f4efdf;     /* 古い和紙 */
+  --ruri: #2a4b7c;      /* 瑠璃色 */
+  --murasaki: #5c3066;  /* 妖しい紫 */
+
+  color-scheme: dark light;
+  font-family: 'Shippori Mincho', 'Yu Mincho', 'Hiragino Mincho ProN', 'Noto Serif JP', serif;
+}
+
+* { 
+  box-sizing: border-box; 
+}
+
+body { 
+  margin: 0; 
+  /* サイケデリックな和風空間を意識した背景 */
+  background: 
+    radial-gradient(circle at 15% 25%, var(--murasaki) 0%, transparent 45%),
+    radial-gradient(circle at 85% 75%, var(--ruri) 0%, transparent 45%),
+    linear-gradient(135deg, #18121c 0%, var(--sumi) 100%);
+  color: var(--washi);
+  min-height: 100svh;
+  background-attachment: fixed;
+}

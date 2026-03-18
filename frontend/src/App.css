@@ -1,0 +1,632 @@
+/* 襖（ふすま）や掛け軸のような外枠 */
+.app { 
+  width: min(1120px, 94vw); 
+  margin: 40px auto; 
+  padding: 24px; 
+  background: var(--sumi); 
+  border: 4px solid var(--kin);
+  border-radius: 0; 
+  box-shadow: 16px 16px 0px rgba(0,0,0,0.9), 0 0 50px rgba(204, 53, 40, 0.2); 
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  .app {
+    margin: 20px auto;
+    padding: 16px;
+    box-shadow: 8px 8px 0px rgba(0,0,0,0.9), 0 0 30px rgba(204, 53, 40, 0.2);
+  }
+}
+
+/* 枠の内側の装飾線 */
+.app::before {
+  content: "";
+  position: absolute;
+  top: 8px; left: 8px; right: 8px; bottom: 8px;
+  border: 1px solid rgba(220, 179, 84, 0.4);
+  pointer-events: none;
+}
+
+.scene { 
+  display: flex; 
+  align-items: center; 
+  justify-content: space-between; 
+  margin-bottom: 24px; 
+  border-bottom: 2px dashed var(--shu);
+  padding-bottom: 16px;
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .scene {
+    flex-direction: column;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+  }
+}
+
+/* 不気味な朱い月 */
+.moon { 
+  width: 56px; 
+  height: 56px; 
+  border-radius: 50%; 
+  background: var(--shu); 
+  box-shadow: 0 0 40px var(--shu), inset -10px -10px 0 rgba(0,0,0,0.4);
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .moon {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* 霞（かすみ）のような雲の表現 */
+.cloud { 
+  color: var(--kin); 
+  font-weight: 800; 
+  font-size: 1.1rem; 
+  letter-spacing: 0.5em; 
+  text-shadow: 2px 2px 0 var(--sumi); 
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 2px,
+    rgba(220, 179, 84, 0.15) 2px,
+    rgba(220, 179, 84, 0.15) 4px
+  );
+  padding: 4px 16px;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .cloud {
+    font-size: 0.9rem;
+    letter-spacing: 0.3em;
+    padding: 2px 8px;
+  }
+}
+
+/* 御札（おふだ）風のカード */
+.card { 
+  border: 3px solid var(--sumi); 
+  padding: 24px; 
+  border-radius: 2px; 
+  background: var(--washi); 
+  color: var(--sumi);
+  box-shadow: inset 0 0 30px rgba(0,0,0,0.05);
+  position: relative;
+}
+
+.register-page,
+.calendar-page {
+  display: grid;
+  gap: 20px;
+}
+
+.nav {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.nav-button {
+  width: auto;
+  margin-top: 0;
+  flex: 1;
+  background: rgba(244, 239, 223, 0.94);
+  color: var(--sumi);
+  border-color: var(--kin);
+  box-shadow: 4px 4px 0 rgba(220, 179, 84, 0.5);
+}
+
+.nav-button.active {
+  background: var(--shu);
+  color: var(--washi);
+  border-color: var(--shu);
+  box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.35);
+}
+
+.header { 
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 2px solid var(--sumi);
+  padding-bottom: 12px;
+  margin-bottom: 20px;
+  gap: 10px;
+}
+
+.calendar-header {
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column-reverse;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+  }
+}
+
+/* 縦書きのアクセント（可能であれば） */
+.eyebrow { 
+  font-size: 0.85rem; 
+  letter-spacing: 0.3em; 
+  color: var(--shu); 
+  margin: 0;
+  writing-mode: vertical-rl;
+  font-weight: 800;
+  position: absolute;
+  right: 24px;
+  top: 24px;
+}
+
+h1 { 
+  margin: 0 0 4px; 
+  font-size: 1.8rem; 
+  font-weight: 800;
+  text-shadow: 1px 1px 0 var(--kin);
+}
+
+@media (max-width: 768px) {
+  h1 {
+    font-size: 1.3rem;
+    margin: 0 0 2px;
+  }
+}
+
+.sub { 
+  margin: 0; 
+  color: #555; 
+  font-size: 0.95rem; 
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  .sub {
+    font-size: 0.8rem;
+  }
+}
+
+/* 判子（ハンコ）風の妖怪バッジ */
+.yokai { 
+  font-weight: 800; 
+  color: var(--shu); 
+  font-size: 1.1rem; 
+  padding: 8px 12px; 
+  border-radius: 2px; 
+  background: transparent; 
+  border: 3px solid var(--shu); 
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transform: rotate(-4deg); /* 少し斜めにして手押し感を出す */
+  box-shadow: 2px 2px 0 rgba(204, 53, 40, 0.2);
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .yokai {
+    font-size: 0.9rem;
+    padding: 6px 10px;
+    transform: rotate(-2deg);
+  }
+}
+
+.yokai-img {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border: 2px solid var(--shu);
+  border-radius: 2px;
+  background: var(--washi);
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .yokai-img {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+.form { display: grid; gap: 16px; margin-top: 12px; }
+
+.summary-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.summary-item {
+  border: 2px solid rgba(26, 21, 21, 0.2);
+  background: rgba(220, 179, 84, 0.14);
+  padding: 14px 16px;
+  display: grid;
+  gap: 6px;
+}
+
+.summary-label {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #6a5b44;
+}
+
+label { 
+  font-size: 0.9rem; 
+  color: var(--sumi); 
+  font-weight: 800;
+  border-left: 4px solid var(--shu);
+  padding-left: 8px;
+}
+
+/* 筆で書き込むような入力欄 */
+input { 
+  border: none;
+  border-bottom: 2px solid var(--sumi); 
+  background: rgba(0,0,0,0.03); 
+  color: var(--sumi); 
+  padding: 10px; 
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  transition: all 0.3s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  input {
+    font-size: 16px;
+    padding: 8px;
+  }
+}
+
+input:focus {
+  outline: none;
+  border-bottom-color: var(--shu);
+  background: rgba(204, 53, 40, 0.05);
+}
+
+/* 木版画のような無骨なボタン */
+button { 
+  border: 2px solid var(--sumi); 
+  border-radius: 0; 
+  padding: 14px 12px; 
+  background: var(--sumi); 
+  color: var(--kin); 
+  font-weight: 800; 
+  font-size: 1.1rem;
+  letter-spacing: 0.2em;
+  cursor: pointer; 
+  font-family: inherit;
+  box-shadow: 4px 4px 0 var(--shu); /* 朱色のパキッとした影 */
+  transition: all 0.2s;
+  margin-top: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  button {
+    font-size: 0.95rem;
+    padding: 12px 10px;
+    box-shadow: 2px 2px 0 var(--shu);
+  }
+}
+
+button:hover { 
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--shu);
+  color: var(--washi);
+}
+
+.status { margin-top: 8px; color: var(--ruri); font-size: 0.9rem; font-weight: 700; }
+.error { color: var(--shu); font-size: 0.9rem; margin-top: 8px; font-weight: 800; }
+
+/* 結果領域：闇に浮かび上がるような反転デザイン */
+.result { 
+  margin-top: 24px; 
+  border-radius: 0; 
+  background: var(--sumi); 
+  border: 2px solid var(--kin); 
+  padding: 16px; 
+  position: relative; 
+  color: var(--washi);
+}
+
+.smoke { 
+  font-size: 0.85rem; 
+  color: var(--kin); 
+  letter-spacing: 0.3em; 
+  margin-bottom: 12px; 
+  border-bottom: 1px solid rgba(220, 179, 84, 0.3);
+  padding-bottom: 8px;
+}
+
+/* 妖怪が出現するアニメーション領域 */
+.yokai-appear {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 12px;
+  border: 2px solid var(--shu);
+  border-radius: 2px;
+  background: rgba(204, 53, 40, 0.08);
+}
+
+.yokai-display {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border: 3px solid var(--kin);
+  border-radius: 4px;
+  background: var(--washi);
+  filter: drop-shadow(0 0 8px var(--shu));
+}
+
+@media (max-width: 768px) {
+  .yokai-display {
+    width: 80px;
+    height: 80px;
+  }
+}
+
+.yokai-text {
+  margin: 0;
+  font-weight: 800;
+  color: var(--shu);
+  font-size: 1.2rem;
+  letter-spacing: 0.1em;
+}
+
+.result h2 { 
+  margin: 0 0 12px; 
+  color: var(--shu); 
+  font-size: 1.4rem; 
+}
+
+@media (max-width: 768px) {
+  .result h2 {
+    font-size: 1.1rem;
+    margin: 0 0 8px;
+  }
+}
+.product, .category, .expiry, .reason { margin: 6px 0; font-size: 0.95rem; }
+
+.item-image { 
+  margin-top: 12px; 
+  max-width: 140px; 
+  border: 3px solid var(--sumi); 
+  background: var(--washi);
+  padding: 4px;
+  /* 古い掛け軸の絵のような色合いに加工 */
+  filter: sepia(0.4) contrast(1.2);
+  width: 100%;
+  height: auto;
+}
+
+.calendar-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.month-button {
+  width: auto;
+  margin-top: 0;
+  padding: 12px 16px;
+  background: rgba(244, 239, 223, 0.92);
+  color: var(--sumi);
+  border-color: var(--kin);
+  box-shadow: 3px 3px 0 rgba(220, 179, 84, 0.5);
+}
+
+.calendar-month {
+  flex: 1;
+  text-align: center;
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.calendar-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+  gap: 20px;
+}
+
+.calendar-grid-wrapper {
+  display: grid;
+  gap: 8px;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.weekday {
+  text-align: center;
+  font-weight: 800;
+  color: var(--shu);
+  padding: 6px 0;
+  border-bottom: 2px solid rgba(204, 53, 40, 0.3);
+}
+
+.calendar-cell {
+  min-height: 132px;
+  border: 2px solid rgba(26, 21, 21, 0.18);
+  background: rgba(255, 252, 245, 0.95);
+  padding: 10px;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.calendar-cell.outside {
+  opacity: 0.45;
+  background: rgba(244, 239, 223, 0.45);
+}
+
+.calendar-cell.today {
+  border-color: var(--shu);
+  box-shadow: inset 0 0 0 1px var(--shu);
+}
+
+.calendar-cell-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.calendar-date {
+  font-weight: 800;
+  font-size: 1rem;
+}
+
+.calendar-count {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--kin);
+  background: var(--sumi);
+  padding: 2px 8px;
+}
+
+.calendar-events {
+  display: grid;
+  gap: 6px;
+}
+
+.calendar-event,
+.calendar-more {
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 6px 8px;
+  border-left: 4px solid var(--ruri);
+  background: rgba(42, 75, 124, 0.12);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.calendar-more {
+  border-left-color: var(--kin);
+  background: rgba(220, 179, 84, 0.18);
+}
+
+.calendar-sidebar {
+  border: 2px solid rgba(26, 21, 21, 0.2);
+  background: rgba(26, 21, 21, 0.04);
+  padding: 18px;
+  display: grid;
+  align-content: start;
+  gap: 14px;
+}
+
+.calendar-sidebar h2 {
+  margin: 0;
+  color: var(--sumi);
+}
+
+.deadline-list {
+  display: grid;
+  gap: 14px;
+}
+
+.deadline-item {
+  border-bottom: 1px solid rgba(26, 21, 21, 0.14);
+  padding-bottom: 14px;
+}
+
+.deadline-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.deadline-date,
+.deadline-name,
+.deadline-meta,
+.sidebar-empty {
+  margin: 0;
+}
+
+.deadline-date {
+  color: var(--shu);
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.deadline-name {
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.deadline-meta,
+.sidebar-empty {
+  font-size: 0.9rem;
+  color: #4f4f4f;
+}
+
+.empty-state {
+  border: 2px dashed rgba(220, 179, 84, 0.9);
+  background: rgba(220, 179, 84, 0.08);
+  color: var(--sumi);
+  padding: 30px 20px;
+  text-align: center;
+  font-weight: 800;
+}
+
+@media (max-width: 768px) {
+  .item-image {
+    max-width: 100px;
+    margin-top: 8px;
+  }
+
+
+
+  .summary-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .calendar-controls {
+    flex-wrap: wrap;
+  }
+
+  .calendar-month {
+    order: -1;
+    width: 100%;
+  }
+
+  .month-button {
+    flex: 1;
+  }
+
+  .calendar-grid {
+    gap: 6px;
+  }
+
+  .calendar-cell {
+    min-height: 92px;
+    padding: 8px;
+  }
+
+  .calendar-event,
+  .calendar-more {
+    font-size: 0.7rem;
+    padding: 4px 6px;
+  }
+}
+
+@media (max-width: 980px) {
+  .calendar-layout {
+    grid-template-columns: 1fr;
+  }
+}
