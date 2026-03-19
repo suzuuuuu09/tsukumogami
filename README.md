@@ -58,6 +58,7 @@ You can also use the helper script:
 - The backend task definition receives database, S3, Yahoo API, and Gemini API settings from Terraform variables.
 - The NLB exposes the frontend on port `80` and the backend on port `5001`.
 - Because NLB does not support path-based routing, the production frontend build is configured to call the backend on the same NLB DNS name with port `5001`.
+- NAT Gateway is not used. ECS tasks run in public subnets with public IPs, while RDS remains in private subnets.
 - `scripts/deploy_infra.sh` runs `terraform init`, `fmt`, `validate`, and then the selected action with your `tfvars` file.
 
 ## CI/CD
