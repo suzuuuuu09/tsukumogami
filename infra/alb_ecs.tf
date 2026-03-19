@@ -166,7 +166,7 @@ resource "aws_ecs_service" "backend" {
   depends_on = [aws_lb_listener.http, aws_lb_listener.backend]
 
   lifecycle {
-    ignore_changes = [task_definition, desired_count]
+    ignore_changes = [desired_count]
   }
 }
 
