@@ -2,6 +2,7 @@ version: 0.2
 
 phases:
   pre_build:
+    on-failure: ABORT
     commands:
       - echo Logging in to Amazon ECR...
       - aws ecr get-login-password --region "$AWS_DEFAULT_REGION" | docker login --username AWS --password-stdin "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com"
@@ -9,12 +10,14 @@ phases:
       - IMAGE_TAG=${COMMIT_HASH:=latest}
       - echo Using image tag "$IMAGE_TAG"
   build:
+    on-failure: ABORT
     commands:
       - echo Building backend image...
       - docker build -f backend/Dockerfile -t "$BACKEND_ECR_URI:$IMAGE_TAG" -t "$BACKEND_ECR_URI:latest" ./backend
       - echo Building frontend image...
       - docker build -f frontend/Dockerfile --build-arg VITE_API_BASE="$FRONTEND_API_BASE" -t "$FRONTEND_ECR_URI:$IMAGE_TAG" -t "$FRONTEND_ECR_URI:latest" ./frontend
   post_build:
+    on-failure: ABORT
     commands:
       - echo Pushing backend image...
       - docker push "$BACKEND_ECR_URI:$IMAGE_TAG"
