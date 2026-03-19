@@ -27,6 +27,7 @@ jobs:
     env:
       TF_IN_AUTOMATION: true
       TF_WORKING_DIR: infra
+      TF_BACKEND_STATE_KEY: ${{ secrets.TF_BACKEND_STATE_KEY || 'infra/terraform.tfstate' }}
 
     steps:
       - name: Checkout
@@ -88,13 +89,29 @@ jobs:
           export_if_set TF_VAR_codestar_connection_name "$SECRET_CODESTAR_CONNECTION_NAME"
           export_if_set TF_VAR_tags "$SECRET_TAGS"
 
+      - name: Write backend config
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        shell: bash
+        env:
+          TF_BACKEND_BUCKET: ${{ secrets.TF_BACKEND_BUCKET }}
+          TF_BACKEND_DYNAMODB_TABLE: ${{ secrets.TF_BACKEND_DYNAMODB_TABLE }}
+          TF_BACKEND_REGION: ${{ secrets.TF_VAR_AWS_REGION || 'ap-northeast-1' }}
+        run: |
+          cat > backend.hcl <<EOF
+          bucket         = "${TF_BACKEND_BUCKET}"
+          key            = "${TF_BACKEND_STATE_KEY}"
+          region         = "${TF_BACKEND_REGION}"
+          dynamodb_table = "${TF_BACKEND_DYNAMODB_TABLE}"
+          encrypt        = true
+          EOF
+
       - name: Terraform fmt
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform fmt -check -recursive
 
       - name: Terraform init
         working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform init -input=false
+        run: terraform init -input=false -backend-config=backend.hcl
 
       - name: Terraform validate
         working-directory: ${{ env.TF_WORKING_DIR }}
@@ -247,6 +264,7 @@ jobs:
     env:
       TF_IN_AUTOMATION: true
       TF_WORKING_DIR: infra
+      TF_BACKEND_STATE_KEY: ${{ secrets.TF_BACKEND_STATE_KEY || 'infra/terraform.tfstate' }}
 
     steps:
       - name: Checkout
@@ -308,9 +326,25 @@ jobs:
           export_if_set TF_VAR_codestar_connection_name "$SECRET_CODESTAR_CONNECTION_NAME"
           export_if_set TF_VAR_tags "$SECRET_TAGS"
 
+      - name: Write backend config
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        shell: bash
+        env:
+          TF_BACKEND_BUCKET: ${{ secrets.TF_BACKEND_BUCKET }}
+          TF_BACKEND_DYNAMODB_TABLE: ${{ secrets.TF_BACKEND_DYNAMODB_TABLE }}
+          TF_BACKEND_REGION: ${{ secrets.TF_VAR_AWS_REGION || 'ap-northeast-1' }}
+        run: |
+          cat > backend.hcl <<EOF
+          bucket         = "${TF_BACKEND_BUCKET}"
+          key            = "${TF_BACKEND_STATE_KEY}"
+          region         = "${TF_BACKEND_REGION}"
+          dynamodb_table = "${TF_BACKEND_DYNAMODB_TABLE}"
+          encrypt        = true
+          EOF
+
       - name: Terraform init
         working-directory: ${{ env.TF_WORKING_DIR }}
-        run: terraform init -input=false
+        run: terraform init -input=false -backend-config=backend.hcl
 
       - name: Download reviewed plan artifact
         uses: actions/download-artifact@v4

@@ -1,0 +1,96 @@
+name: Terraform Backend Bootstrap
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: terraform-backend-bootstrap
+  cancel-in-progress: false
+
+jobs:
+  bootstrap:
+    name: Bootstrap Terraform Backend
+    runs-on: ubuntu-latest
+    env:
+      TF_IN_AUTOMATION: true
+      TF_WORKING_DIR: infra/bootstrap
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.TF_VAR_AWS_REGION || 'ap-northeast-1' }}
+
+      - name: Export bootstrap variables from secrets
+        env:
+          SECRET_AWS_REGION: ${{ secrets.TF_VAR_AWS_REGION }}
+          SECRET_PROJECT_NAME: ${{ secrets.TF_VAR_PROJECT_NAME }}
+          SECRET_ENVIRONMENT: ${{ secrets.TF_VAR_ENVIRONMENT }}
+          SECRET_STATE_BUCKET_NAME: ${{ secrets.TF_BACKEND_BUCKET }}
+          SECRET_LOCK_TABLE_NAME: ${{ secrets.TF_BACKEND_DYNAMODB_TABLE }}
+          SECRET_TAGS: ${{ secrets.TF_VAR_TAGS }}
+        shell: bash
+        run: |
+          export_if_set() {
+            key="$1"
+            value="$2"
+            if [ -n "$value" ]; then
+              printf '%s=%s\n' "$key" "$value" >> "$GITHUB_ENV"
+            fi
+          }
+
+          export_if_set TF_VAR_aws_region "$SECRET_AWS_REGION"
+          export_if_set TF_VAR_project_name "$SECRET_PROJECT_NAME"
+          export_if_set TF_VAR_environment "$SECRET_ENVIRONMENT"
+          export_if_set TF_VAR_state_bucket_name "$SECRET_STATE_BUCKET_NAME"
+          export_if_set TF_VAR_lock_table_name "$SECRET_LOCK_TABLE_NAME"
+          export_if_set TF_VAR_tags "$SECRET_TAGS"
+
+      - name: Terraform fmt
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform fmt -check -recursive
+
+      - name: Terraform init
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform init -input=false
+
+      - name: Terraform validate
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform validate
+
+      - name: Terraform apply
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform apply -input=false -auto-approve
+
+      - name: Capture outputs
+        id: outputs
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        shell: bash
+        run: |
+          echo "bucket=$(terraform output -raw terraform_state_bucket)" >> "$GITHUB_OUTPUT"
+          echo "table=$(terraform output -raw terraform_lock_table)" >> "$GITHUB_OUTPUT"
+
+      - name: Add summary
+        shell: bash
+        run: |
+          {
+            echo "## Terraform backend bootstrap complete"
+            echo
+            echo "- S3 bucket: \`${{ steps.outputs.outputs.bucket }}\`"
+            echo "- DynamoDB lock table: \`${{ steps.outputs.outputs.table }}\`"
+            echo
+            echo "These values must match the repository secrets \`TF_BACKEND_BUCKET\` and \`TF_BACKEND_DYNAMODB_TABLE\`."
+          } >> "$GITHUB_STEP_SUMMARY"

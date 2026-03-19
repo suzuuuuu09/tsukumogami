@@ -28,19 +28,41 @@ The `infra` directory provisions the following AWS resources with Terraform:
 - CloudWatch log groups
 - CodeBuild and CodePipeline for CI/CD
 
+Terraform state for the main stack is stored remotely in S3 and locked with DynamoDB.
+
 ### Files to edit
 
 Set your environment-specific values in:
 
 - `infra/terraform.tfvars`
+- `infra/bootstrap/terraform.tfvars` for the Terraform state backend bootstrap stack
 
 The file is intentionally ignored by Git so you can keep secrets local.
 
-### Apply Terraform
+### Bootstrap the Terraform backend
+
+Create the remote state bucket and lock table first:
+
+```bash
+cp infra/bootstrap/terraform.tfvars.example infra/bootstrap/terraform.tfvars
+./scripts/bootstrap_tf_backend.sh apply
+```
+
+After that, create `infra/backend.hcl` using the bootstrap outputs. You can start from `infra/backend.hcl.example`:
+
+```hcl
+bucket         = "your-tfstate-bucket"
+key            = "infra/terraform.tfstate"
+region         = "ap-northeast-1"
+dynamodb_table = "your-terraform-locks"
+encrypt        = true
+```
+
+### Apply the main Terraform stack
 
 ```bash
 cd infra
-terraform init
+terraform init -backend-config=backend.hcl
 terraform plan -var-file=terraform.tfvars
 terraform apply -var-file=terraform.tfvars
 ```
@@ -48,8 +70,8 @@ terraform apply -var-file=terraform.tfvars
 You can also use the helper script:
 
 ```bash
-./scripts/deploy_infra.sh plan
-./scripts/deploy_infra.sh apply
+BACKEND_CONFIG_FILE=./infra/backend.hcl ./scripts/deploy_infra.sh plan
+BACKEND_CONFIG_FILE=./infra/backend.hcl ./scripts/deploy_infra.sh apply
 ```
 
 ### Important notes
@@ -59,6 +81,7 @@ You can also use the helper script:
 - The NLB exposes the frontend on port `80` and the backend on port `5001`.
 - Because NLB does not support path-based routing, the production frontend build is configured to call the backend on the same NLB DNS name with port `5001`.
 - NAT Gateway is not used. ECS tasks run in public subnets with public IPs, while RDS remains in private subnets.
+- Leave `db_engine_version` unset unless you need a specific PostgreSQL version. AWS will then choose a supported version for the selected region.
 - `scripts/deploy_infra.sh` runs `terraform init`, `fmt`, `validate`, and then the selected action with your `tfvars` file.
 
 ## CI/CD
@@ -77,6 +100,7 @@ GitHub Actions workflows are configured for:
 
 - frontend lint and build checks
 - backend dependency install and import checks
+- Terraform backend bootstrap for remote state
 - Terraform plan on pull requests
 - Terraform plan on merges to `main`
 - Terraform apply after review on merges to `main`
@@ -94,6 +118,8 @@ To prevent merges into `main` when the app has errors, configure GitHub branch p
 Configure these repository secrets:
 
 - `AWS_ROLE_ARN`: IAM role ARN used by GitHub OIDC to run Terraform
+- `TF_BACKEND_BUCKET`
+- `TF_BACKEND_DYNAMODB_TABLE`
 - `TF_VAR_AWS_REGION`
 - `TF_VAR_PROJECT_NAME`
 - `TF_VAR_ENVIRONMENT`
@@ -112,6 +138,7 @@ Configure these repository secrets:
 
 Optional repository secret:
 
+- `TF_BACKEND_STATE_KEY`: defaults to `infra/terraform.tfstate`
 - `TF_VAR_TAGS`
 
 For list and map variables, store valid Terraform/HCL values in the secret, for example:
@@ -130,6 +157,15 @@ When a pull request targets `main`, GitHub Actions will:
 4. run `terraform plan`
 5. post a PR comment showing create, update, delete, and replace counts
 
+### First-time GitHub Actions setup
+
+Before the normal Terraform workflow can run, execute `Terraform Backend Bootstrap` once from the GitHub Actions UI. It creates the remote state bucket and lock table using:
+
+- `TF_BACKEND_BUCKET`
+- `TF_BACKEND_DYNAMODB_TABLE`
+
+After that, the regular `Terraform Deploy` workflow can use the same backend automatically.
+
 ### Review before apply
 
 When code is merged into `main`, the `Terraform Deploy` workflow will:
@@ -147,3 +183,11 @@ To make this work as an approval gate:
 3. merge into `main`
 4. review the `Terraform Plan` job output in the `Terraform Deploy` workflow
 5. approve the `Terraform Apply` job
+
+### Recovering from a failed first apply
+
+If an earlier apply created AWS resources before Terraform remote state was configured, Terraform may fail with `AlreadyExists` errors for ECR, IAM, S3, or CloudWatch resources. In that case:
+
+1. configure the remote backend first
+2. delete the orphaned resources from AWS, or import them into state
+3. rerun `terraform plan`
