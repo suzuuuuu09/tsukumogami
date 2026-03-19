@@ -41,6 +41,8 @@ frontend/dist-ssr/
 
 # Terraform / infra
 infra/.terraform/
+infra/.backend.hcl
+infra/backend.hcl
 infra/*.tfstate
 infra/*.tfstate.*
 infra/crash.log

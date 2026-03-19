@@ -111,9 +111,10 @@ variable "db_allocated_storage" {
 }
 
 variable "db_engine_version" {
-  description = "PostgreSQL engine version."
+  description = "Optional PostgreSQL engine version. Leave null to let AWS choose a supported default."
   type        = string
-  default     = "16.3"
+  default     = null
+  nullable    = true
 }
 
 variable "db_port" {
