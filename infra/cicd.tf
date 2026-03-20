@@ -40,7 +40,7 @@ resource "aws_codebuild_project" "containers" {
 
     environment_variable {
       name  = "FRONTEND_API_BASE"
-      value = "http://${aws_lb.app.dns_name}:${var.backend_container_port}"
+      value = "https://${var.app_domain_name}:${var.backend_container_port}"
     }
   }
 

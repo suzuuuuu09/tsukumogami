@@ -46,6 +46,34 @@ variable "frontend_container_port" {
   default     = 80
 }
 
+variable "frontend_listener_port" {
+  description = "Public listener port for the frontend on the NLB."
+  type        = number
+  default     = 443
+}
+
+variable "frontend_listener_protocol" {
+  description = "Frontend listener protocol for the NLB."
+  type        = string
+  default     = "TLS"
+}
+
+variable "backend_listener_protocol" {
+  description = "Backend listener protocol for the NLB."
+  type        = string
+  default     = "TLS"
+}
+
+variable "app_domain_name" {
+  description = "Public DNS name for the application, such as app.example.com."
+  type        = string
+}
+
+variable "route53_zone_name" {
+  description = "Public Route 53 hosted zone name that manages the application domain, such as example.com."
+  type        = string
+}
+
 variable "backend_cpu" {
   description = "CPU units for the backend task."
   type        = number

@@ -49,10 +49,11 @@ resource "aws_lb_target_group" "backend" {
   }
 }
 
-resource "aws_lb_listener" "http" {
+resource "aws_lb_listener" "frontend_https" {
   load_balancer_arn = aws_lb.app.arn
-  port              = 80
-  protocol          = "TCP"
+  port              = var.frontend_listener_port
+  protocol          = var.frontend_listener_protocol
+  certificate_arn   = aws_acm_certificate_validation.app.certificate_arn
 
   default_action {
     type             = "forward"
@@ -60,10 +61,11 @@ resource "aws_lb_listener" "http" {
   }
 }
 
-resource "aws_lb_listener" "backend" {
+resource "aws_lb_listener" "backend_https" {
   load_balancer_arn = aws_lb.app.arn
   port              = var.backend_container_port
-  protocol          = "TCP"
+  protocol          = var.backend_listener_protocol
+  certificate_arn   = aws_acm_certificate_validation.app.certificate_arn
 
   default_action {
     type             = "forward"
@@ -163,7 +165,7 @@ resource "aws_ecs_service" "backend" {
 
   health_check_grace_period_seconds = 60
 
-  depends_on = [aws_lb_listener.http, aws_lb_listener.backend]
+  depends_on = [aws_lb_listener.frontend_https, aws_lb_listener.backend_https]
 
   lifecycle {
     ignore_changes = [desired_count]
@@ -191,7 +193,7 @@ resource "aws_ecs_service" "frontend" {
 
   health_check_grace_period_seconds = 60
 
-  depends_on = [aws_lb_listener.http]
+  depends_on = [aws_lb_listener.frontend_https]
 
   lifecycle {
     ignore_changes = [task_definition, desired_count]

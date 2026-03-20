@@ -78,8 +78,9 @@ BACKEND_CONFIG_FILE=./infra/backend.hcl ./scripts/deploy_infra.sh apply
 
 - After Terraform creates the CodeStar connection, complete the GitHub connection handshake in the AWS console before the pipeline can pull source code.
 - The backend task definition receives database, S3, Yahoo API, and Gemini API settings from Terraform variables.
-- The NLB exposes the frontend on port `80` and the backend on port `5002`.
-- Because NLB does not support path-based routing, the production frontend build is configured to call the backend on the same NLB DNS name with port `5002`.
+- The NLB exposes the frontend on port `443` with TLS termination and the backend on port `5002` with TLS as well.
+- HTTPS requires a public Route 53 hosted zone plus an application hostname that you control. Terraform now provisions ACM DNS validation and a Route 53 alias for that hostname.
+- Because NLB does not support path-based routing, the production frontend build is configured to call the backend on the same application hostname with port `5002`.
 - NAT Gateway is not used. ECS tasks run in public subnets with public IPs, while RDS remains in private subnets.
 - Leave `db_engine_version` unset unless you need a specific PostgreSQL version. AWS will then choose a supported version for the selected region.
 - `scripts/deploy_infra.sh` runs `terraform init`, `fmt`, `validate`, and then the selected action with your `tfvars` file.
@@ -135,6 +136,8 @@ Configure these repository secrets:
 - `TF_VAR_GITHUB_REPO`
 - `TF_VAR_PIPELINE_BRANCH`
 - `TF_VAR_CODESTAR_CONNECTION_NAME`
+- `TF_VAR_APP_DOMAIN_NAME`
+- `TF_VAR_ROUTE53_ZONE_NAME`
 
 Optional repository secret:
 

@@ -3,6 +3,16 @@ output "nlb_dns_name" {
   description = "Public DNS name of the network load balancer."
 }
 
+output "frontend_url" {
+  value       = "https://${var.app_domain_name}"
+  description = "Public HTTPS URL for the frontend."
+}
+
+output "backend_url" {
+  value       = "https://${var.app_domain_name}:${var.backend_container_port}"
+  description = "Public HTTPS URL for the backend."
+}
+
 output "backend_ecr_repository_url" {
   value       = aws_ecr_repository.backend.repository_url
   description = "ECR repository URL for the backend image."
