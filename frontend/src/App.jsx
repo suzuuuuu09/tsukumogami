@@ -40,15 +40,20 @@ function App() {
   }, [savedEntries])
 
   const handleSubmit = async () => {
-    let permission = Notification.permission;
-    if (permission === 'default') {
-      permission = await Notification.requestPermission();
-    }
+    try {
+      let permission = Notification.permission;
+      if (permission === 'default') {
+        permission = await Notification.requestPermission();
+      }
 
-    if (permission === 'granted') {
-      new Notification('物品登録完了！', {
-        body: '物品の登録が完了しました。交換期限が近づいたらお知らせします',
-      });
+      if (permission === 'granted') {
+        new Notification('物品登録完了！', {
+          body: '物品の登録が完了しました。交換期限が近づいたらお知らせします。',
+        });
+      }
+    } catch (notificationError) {
+      alert('物品の登録処理が完了しました。交換期限が近付いたらお知らせします。');
+      console.error('この端末では通知を表示できませんでしたが、登録処理は完了しています。', notificationError);
     }
     const newYokai = getRandomYokai()
     setResultYokai(newYokai)
