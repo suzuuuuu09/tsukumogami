@@ -14,7 +14,7 @@ function CalendarPage({ calendarMonth, itemsByDate, monthlyEntries, savedEntries
   return (
     <div className="calendar-page">
       <PageHeader
-        title="賞味期限カレンダー"
+        title="交換期限カレンダー"
         subtitle="登録した食材や食品を月ごとに確認できる、妖怪たちの見張り帳です。"
         badge={{
           items: [...headerBadges, { variant: 'count', label: `登録 ${savedEntries.length} 件` }],
