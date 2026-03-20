@@ -48,11 +48,11 @@ function App() {
 
       if (permission === 'granted') {
         new Notification('物品登録完了！', {
-          body: '物品の登録が完了しました。交換期限が近づいたらお知らせします',
+          body: '物品の登録が完了しました。交換期限が近づいたらお知らせします。',
         });
       }
     } catch (notificationError) {
-      alert('物品の登録処理が完了しました。');
+      alert('物品の登録処理が完了しました。交換期限が近付いたらお知らせします。');
       console.error('この端末では通知を表示できませんでしたが、登録処理は完了しています。', notificationError);
     }
     const newYokai = getRandomYokai()
