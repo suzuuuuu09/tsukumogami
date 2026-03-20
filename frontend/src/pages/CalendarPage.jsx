@@ -5,10 +5,10 @@ import { yokaiList } from '../constants/yokai'
 import { formatMonthLabel } from '../utils/date'
 
 function CalendarPage({ calendarMonth, itemsByDate, monthlyEntries, savedEntries, onMoveMonth }) {
-  const headerBadges = yokaiList.slice(0, Math.min(3, Math.max(savedEntries.length, 1))).map((yokai, _) => ({
+  const headerBadges = yokaiList.slice(0, Math.min(3, Math.max(savedEntries.length, 1))).map((yokai, i) => ({
     variant: 'image',
     yokai,
-    label: `期限`,
+    label: `期限${i}`,
   }))
 
   return (
