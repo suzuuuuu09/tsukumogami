@@ -74,7 +74,7 @@ function App() {
   const itemsByDate = getItemsByDate(savedEntries)
   const monthlyEntries = getMonthlyEntries(savedEntries, calendarMonth)
   const upcomingEntry = getUpcomingEntry(savedEntries)
-  const publicVapidKey = "BCc4mItFO0zfgEKjiwz2QfoU1GG_qGj9VdmzcpLwWtWibyZH5yunVIUWHgasxucHBnNjsJL6g7m1BeiuQNDuiB8"
+
 
   return (
     <div className="app">
