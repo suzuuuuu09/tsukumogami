@@ -3,13 +3,20 @@
   width: min(1120px, 94vw); 
   margin: 40px auto; 
   padding: 24px; 
-  background: var(--sumi); 
   border: 4px solid transparent;
   border-image-source: var(--gold-texture);
   border-image-slice: 120;
   border-radius: 0; 
   box-shadow: 16px 16px 0px rgba(0,0,0,0.9), 0 0 50px rgba(204, 53, 40, 0.2); 
   position: relative;
+}
+.back::before {
+  content: "";
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: url(/wagara.png);
+  opacity: 0.05;
+  z-index: -1;
 }
 
 @media (max-width: 768px) {
@@ -126,6 +133,57 @@
   margin-bottom: 24px;
 }
 
+.header-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.yokai-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--shu);
+  padding: 8px 12px;
+  border: 3px solid var(--shu);
+  border-radius: 2px;
+  box-shadow: 0 0 0 rgba(204, 53, 40, 0);
+  white-space: nowrap;
+  opacity: 0;
+  transform: rotate(-12deg) scale(1.8);
+  transform-origin: center;
+  animation: hanko 1250ms cubic-bezier(0.2, 0.9, 0.25, 1.2) both;
+  animation-delay: var(--stamp-delay, 0ms);
+}
+
+
+@keyframes hanko {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px) rotate(-18deg) scale(1.5);
+    box-shadow: 0 0 0 rgba(204, 53, 40, 0);
+  }
+  45% {
+    opacity: 1;
+    transform: translateY(2px) rotate(4deg) scale(0.92);
+    box-shadow: 0 0 0 rgba(204, 53, 40, 0);
+  }
+  65% {
+    opacity: 1;
+    transform: translateY(0) rotate(-2deg) scale(1.06);
+    box-shadow: 0 0 18px rgba(204, 53, 40, 0.18);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(-4deg) scale(1);
+    box-shadow: 2px 2px 0 rgba(204, 53, 40, 0.2);
+  }
+}
+
 .nav-button {
   width: auto;
   margin-top: 0;
@@ -159,11 +217,14 @@
   gap: 10px;
 }
 
-.calendar-header {
-  align-items: center;
-}
 
 @media (max-width: 768px) {
+  .header-badges {
+    justify-content: flex-start;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
   .header {
     flex-direction: column-reverse;
     padding-bottom: 8px;
@@ -191,23 +252,10 @@ h1 {
   text-shadow: 1px 1px 0 rgba(79, 49, 12, 0.24);
 }
 
-h1,
-.calendar-month,
-.deadline-date {
-  background-image:
-    linear-gradient(180deg, rgba(255, 241, 201, 0.96), rgba(173, 123, 37, 0.92)),
-    var(--gold-texture);
-  background-size: auto, cover;
-  background-position: center, center;
-  background-blend-mode: screen, multiply;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
 
 @media (max-width: 768px) {
   h1 {
-    font-size: 1.3rem;
+    font-size: 1.5rem;
     margin: 0 0 2px;
   }
 }
@@ -247,6 +295,11 @@ h1,
     font-size: 0.9rem;
     padding: 6px 10px;
     transform: rotate(-2deg);
+  }
+
+  .yokai-badge {
+    font-size: 0.9rem;
+    padding: 6px 10px;
   }
 }
 
@@ -561,9 +614,6 @@ button:hover {
   font-size: 0.75rem;
   font-weight: 800;
   color: #4a3008;
-  background-image:
-    linear-gradient(rgba(255, 234, 178, 0.86), rgba(214, 165, 74, 0.82)),
-    var(--gold-texture);
   background-size: auto, cover;
   background-position: center, center;
   padding: 2px 8px;

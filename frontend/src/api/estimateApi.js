@@ -14,7 +14,7 @@ export async function requestExpirationEstimate({ barcode, purchaseDate }) {
 
   if (!response.ok) {
     const body = await response.json().catch(() => ({}))
-    throw new Error(body.detail || 'サーバーエラー')
+    throw new Error(body.detail || '接続失敗')
   }
 
   return response.json()

@@ -40,6 +40,16 @@ function App() {
   }, [savedEntries])
 
   const handleSubmit = async () => {
+    let permission = Notification.permission;
+    if (permission === 'default') {
+      permission = await Notification.requestPermission();
+    }
+
+    if (permission === 'granted') {
+      new Notification('物品登録完了！', {
+        body: '物品の登録が完了しました。交換期限が近づいたらお知らせします',
+      });
+    }
     const newYokai = getRandomYokai()
     setResultYokai(newYokai)
     setError('')
@@ -64,6 +74,7 @@ function App() {
   const itemsByDate = getItemsByDate(savedEntries)
   const monthlyEntries = getMonthlyEntries(savedEntries, calendarMonth)
   const upcomingEntry = getUpcomingEntry(savedEntries)
+
 
   return (
     <div className="app">
