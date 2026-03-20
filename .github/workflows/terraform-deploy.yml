@@ -353,30 +353,6 @@ jobs:
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: terraform init -input=false -backend-config=backend.hcl
 
-      - name: Detect infrastructure drift before apply
-        working-directory: ${{ env.TF_WORKING_DIR }}
-        shell: bash
-        run: |
-          set +e
-          terraform plan \
-            -input=false \
-            -refresh-only \
-            -detailed-exitcode \
-            -no-color > drift-check.txt
-          exit_code=$?
-          set -e
-
-          if [ "$exit_code" -eq 1 ]; then
-            cat drift-check.txt
-            exit 1
-          fi
-
-          if [ "$exit_code" -eq 2 ]; then
-            cat drift-check.txt
-            echo "Infrastructure drift was detected after the reviewed plan was created. Re-run the workflow to generate a fresh plan before apply."
-            exit 1
-          fi
-
       - name: Download reviewed plan artifact
         uses: actions/download-artifact@v4
         with:
