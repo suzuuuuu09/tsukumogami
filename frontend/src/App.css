@@ -150,15 +150,16 @@
   font-weight: 800;
   color: var(--shu);
   padding: 8px 12px;
-  border: 3px solid var(--shu);
+  border: 3.5px solid rgba(204, 53, 40, 0.9);
   border-radius: 2px;
   box-shadow: 0 0 0 rgba(204, 53, 40, 0);
   white-space: nowrap;
-  opacity: 0;
-  transform: rotate(-12deg) scale(1.8);
-  transform-origin: center;
-  animation: hanko 1250ms cubic-bezier(0.2, 0.9, 0.25, 1.2) both;
-  animation-delay: var(--stamp-delay, 0ms);
+  animation: hanko 0.6s ease-out forwards;
+}
+
+.image-badge {
+  gap: 12px;
+  padding: 12px 12px;
 }
 
 
@@ -302,11 +303,16 @@ h1 {
     font-size: 0.9rem;
     padding: 6px 10px;
   }
+
+  .image-badge {
+    gap: 10px;
+    padding: 9px 12px;
+  }
 }
 
 .yokai-img {
-  width: 48px;
-  height: 48px;
+  width: 88px;
+  height: 88px;
   object-fit: cover;
   background: rgba(0,0,0,0.0);
   flex-shrink: 0;
@@ -314,14 +320,14 @@ h1 {
 
 @media (max-width: 768px) {
   .yokai-img {
-    width: 36px;
-    height: 36px;
+    width: 54px;
+    height: 54px;
   }
 }
 
 .yokai-badge-label {
   display: inline-block;
-  font-size: 1.22rem;
+  font-size: 1.5rem;
   line-height: 1;
   letter-spacing: 0.02em;
   transform: translateY(1px);
@@ -329,7 +335,7 @@ h1 {
 
 @media (max-width: 768px) {
   .yokai-badge-label {
-    font-size: 0.98rem;
+    font-size: 1.18rem;
   }
 }
 

@@ -1,11 +1,14 @@
 export const yokaiImageMap = {
+  鬼: 'oni.png',
+  狛犬: 'komainu.png',
+  雪女: 'yuki_onnna.png',
+  傘地蔵: 'kasajizou.png',
+  化け猫: 'bakeneko.png',
+  唐傘おばけ: 'kasa_youkai.png',
+  座敷童子: 'zashiki_warashi.png',
+  狸: 'tanuki.png',
   河童: 'kappa.png',
-  九尾: 'kyuubi.png',
-  猫又: 'nekomata.png',
-  おばけ: 'obake.png',
-  一反木綿: 'ittanmomen.png',
-  一つ目小僧: 'hitotsume_kozou.png',
-  傘妖怪: 'kasa_youkai.png',
+  だるま: 'daruma_red.png',
 }
 
 export const yokaiList = Object.keys(yokaiImageMap)
