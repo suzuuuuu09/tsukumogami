@@ -8,16 +8,16 @@ function ResultCard({ result, resultYokai }) {
 
   return (
     <div className="result">
-      <div className="smoke">煙が漂い… カレンダーにも記録されました</div>
+      <div className="smoke">物品情報と交換期限を記録しました</div>
       <div className="yokai-appear">
         <img src={`/${yokaiImageMap[resultYokai]}`} alt={resultYokai} className="yokai-display" />
         <p className="yokai-text">{resultYokai}が出現した！</p>
       </div>
       <h2>物品情報</h2>
-      <p className="product">📦 {result.product_name}</p>
-      <p className="category">🪓 カテゴリ: {result.category}</p>
-      <p className="expiry">⏳ 期限日: {formatDisplayDate(result.suggested_expiration)}</p>
-      <p className="reason">✍️ {result.reason}</p>
+      <p className="product"> ・物品名<br/> <small>{result.product_name}</small></p>
+      <p className="category"> ・種別 <br/><small>{result.category}</small></p>
+      <p className="expiry"> ・交換期限 <br/><small>{formatDisplayDate(result.suggested_expiration)}</small></p>
+      <p className="reason"> ・理由 <br/><small>{result.reason}</small></p>
       {result.product_image && <img className="item-image" src={result.product_image} alt="商品" />}
     </div>
   )

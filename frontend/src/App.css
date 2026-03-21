@@ -457,9 +457,7 @@ button:hover {
   color: #e8c76d; 
   letter-spacing: 0.3em; 
   margin-bottom: 12px; 
-  border-bottom: 1px solid transparent;
-  border-image-source: var(--gold-texture);
-  border-image-slice: 120;
+  border-bottom: 1px solid rgba(232, 199, 109, 0.5);
   padding-bottom: 8px;
 }
 
@@ -480,11 +478,8 @@ button:hover {
   width: 120px;
   height: 120px;
   object-fit: cover;
-  border: 3px solid transparent;
-  border-image-source: var(--gold-texture);
-  border-image-slice: 120;
   border-radius: 4px;
-  background: var(--washi);
+  background: rgba(0,0,0,0.0);
   filter: drop-shadow(0 0 8px var(--shu));
 }
 
