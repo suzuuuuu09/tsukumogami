@@ -1,7 +1,9 @@
 import os
-from datetime import date, timedelta
-
+import cv2
+import numpy as np
 import requests
+from pyzbar.pyzbar import decode
+from datetime import date, timedelta
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 from flask_cors import CORS
@@ -127,6 +129,27 @@ def get_yahoo_item(jan_code: str, request_url: str | None = None) -> dict:
 
     return hits[0]
 
+### added ###
+def decode_barcode_from_image(file) -> dict:
+    file_bytes = np.frombuffer(file.read(), np.uint8)
+    img = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
+
+    if img is None:
+        raise APIError(400, "The image could not be loaded correctly. Please check the image format")
+    
+    barcodes = decode(img)
+    if not barcodes:
+        raise APIError(404, "Barcode is not detected from the image")
+
+    barcode_data = barcodes[0].data.decode('utf-8')
+    barcode_type = barcodes[0].type
+
+    return {
+        "barcode": barcode_data,
+        "type": barcode_type
+    }
+
+### added ###
 
 def infer_deadline_reason(
     product_name: str,
@@ -233,6 +256,23 @@ def estimate():
         }
     )
 
+### added ###
+@app.post("/api/scan-barcode") #あとで決める
+def scan_barcode():
+    if "image" not in request.files:
+        raise APIError(400, "Not included the 'image' key")
+    
+    file = request.files['image']
+
+    try:
+        result = decode_barcode_from_image(file)
+    except APIError:
+        raise
+    except Exception as exc:
+        raise APIError(500, f"An unexpected error has occurred: {exc}") from exc
+    
+    return jsonify(result)
+### added ###
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", "5002"))

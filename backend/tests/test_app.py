@@ -1,9 +1,9 @@
+import io
 import pytest
 from datetime import date
-
 from app import guess_category, estimate_expiration_date, app
-
 from unittest.mock import patch
+from collections import namedtuple
 
 def test_guess_category():
     assert guess_category("panasonic 冷蔵庫", "最新モデル") == "冷蔵庫"
@@ -81,3 +81,57 @@ def test_estimate_success_with_mock(mock_post, mock_get, client):
 
     mock_get.assert_called_once()
     mock_post.assert_called_once()
+
+@patch("app.decode")
+@patch("app.cv2.imdecode")
+def test_scan_barcode_success(mock_imdecode, mock_decode, client):
+
+    mock_imdecode.return_value = "dummy_image_array"
+
+    Decoded = namedtuple("Decoded", ["data", "type"])
+    mock_barcode = Decoded(data=b"4901234567890", type="EAN13")
+
+    mock_decode.return_value = [mock_barcode]
+
+    data = {
+        "image": (io.BytesIO(b"fake_image_bytes"), "test.jpg")
+    }
+    response = client.post("/api/scan-barcode", data=data)
+
+    assert response.status_code == 200
+    json_data = response.get_json()
+    assert json_data["barcode"] == "4901234567890"
+    assert json_data["type"] == "EAN13"
+
+def test_scan_barcode_no_file(client):
+    response = client.post("/api/scan-barcode", data={})
+
+    assert response.status_code == 400
+    assert "image" in response.get_json()["detail"]
+
+@patch("app.cv2.imdecode")
+def test_scan_barcode_invalid_image(mock_imdecode, client):
+    mock_imdecode.return_value = None
+
+    data = {
+        "image": (io.BytesIO(b"bad_data"), "test.txt")
+    }
+    response = client.post("/api/scan-barcode", data=data)
+
+    assert response.status_code == 400
+    assert "could not be loaded correctly" in response.get_json()["detail"]
+
+@patch("app.decode")
+@patch("app.cv2.imdecode")
+def test_scan_barcode_no_barcode_found(mock_imdecode, mock_decode, client):
+    mock_imdecode.return_value = "dummy_image_array"
+    mock_decode.return_value = []
+
+    data = {
+        "image": (io.BytesIO(b"fake_image_bytes"), "test.jpg")
+    }
+    response = client.post("/api/scan-barcode", data=data)
+
+    assert response.status_code == 404
+    assert "not detected" in response.get_json()["detail"]
+ 
