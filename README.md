@@ -23,7 +23,7 @@ The `infra` directory provisions the following AWS resources with Terraform:
 - VPC with public and private subnets
 - ECS Fargate cluster, services, and NLB
 - ECR repositories for frontend and backend images
-- RDS PostgreSQL
+- DynamoDB
 - S3 buckets for pipeline artifacts and app storage
 - CloudWatch log groups
 - CodeBuild and CodePipeline for CI/CD
@@ -77,12 +77,11 @@ BACKEND_CONFIG_FILE=./infra/backend.hcl ./scripts/deploy_infra.sh apply
 ### Important notes
 
 - After Terraform creates the CodeStar connection, complete the GitHub connection handshake in the AWS console before the pipeline can pull source code.
-- The backend task definition receives database, S3, Yahoo API, and Gemini API settings from Terraform variables.
+- The backend task definition receives DynamoDB, S3, Yahoo API, and Gemini API settings from Terraform variables.
 - The NLB exposes the frontend on port `443` with TLS termination and the backend on port `5002` with TLS as well.
 - HTTPS requires a public Route 53 hosted zone plus an application hostname that you control. Terraform now provisions ACM DNS validation and a Route 53 alias for that hostname.
 - Because NLB does not support path-based routing, the production frontend build is configured to call the backend on the same application hostname with port `5002`.
-- NAT Gateway is not used. ECS tasks run in public subnets with public IPs, while RDS remains in private subnets.
-- Leave `db_engine_version` unset unless you need a specific PostgreSQL version. AWS will then choose a supported version for the selected region.
+- NAT Gateway is not used. ECS tasks run in public subnets with public IPs.
 - `scripts/deploy_infra.sh` runs `terraform init`, `fmt`, `validate`, and then the selected action with your `tfvars` file.
 
 ## CI/CD
@@ -127,9 +126,7 @@ Configure these repository secrets:
 - `TF_VAR_VPC_CIDR`
 - `TF_VAR_PUBLIC_SUBNET_CIDRS`
 - `TF_VAR_PRIVATE_SUBNET_CIDRS`
-- `TF_VAR_DB_NAME`
-- `TF_VAR_DB_USERNAME`
-- `TF_VAR_DB_PASSWORD`
+- `TF_VAR_DYNAMODB_TABLE_NAME`
 - `TF_VAR_YAHOO_APP_ID`
 - `TF_VAR_GEMINI_API_KEY`
 - `TF_VAR_GITHUB_OWNER`

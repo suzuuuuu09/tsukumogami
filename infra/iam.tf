@@ -37,6 +37,22 @@ data "aws_iam_policy_document" "ecs_task_policy" {
       "${aws_s3_bucket.app_storage.arn}/*"
     ]
   }
+
+  statement {
+    actions = [
+      "dynamodb:BatchGetItem",
+      "dynamodb:DeleteItem",
+      "dynamodb:GetItem",
+      "dynamodb:PutItem",
+      "dynamodb:Query",
+      "dynamodb:Scan",
+      "dynamodb:UpdateItem"
+    ]
+    resources = [
+      aws_dynamodb_table.app_data.arn,
+      "${aws_dynamodb_table.app_data.arn}/index/*"
+    ]
+  }
 }
 
 resource "aws_iam_role_policy" "ecs_task" {
@@ -87,8 +103,7 @@ data "aws_iam_policy_document" "codebuild_policy" {
       "ecr:UploadLayerPart"
     ]
     resources = [
-      aws_ecr_repository.backend.arn,
-      aws_ecr_repository.frontend.arn
+      aws_ecr_repository.backend.arn
     ]
   }
 
@@ -103,6 +118,24 @@ data "aws_iam_policy_document" "codebuild_policy" {
       aws_s3_bucket.artifacts.arn,
       "${aws_s3_bucket.artifacts.arn}/*"
     ]
+  }
+
+  statement {
+    actions = [
+      "s3:GetObject",
+      "s3:PutObject",
+      "s3:DeleteObject",
+      "s3:ListBucket"
+    ]
+    resources = [
+      aws_s3_bucket.frontend.arn,
+      "${aws_s3_bucket.frontend.arn}/*"
+    ]
+  }
+
+  statement {
+    actions = ["cloudfront:CreateInvalidation"]
+    resources = [aws_cloudfront_distribution.frontend.arn]
   }
 }
 

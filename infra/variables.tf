@@ -69,6 +69,13 @@ variable "app_domain_name" {
   type        = string
 }
 
+variable "backend_domain_name" {
+  description = "Public DNS name for the backend API. Leave null to use api.<app_domain_name>."
+  type        = string
+  default     = null
+  nullable    = true
+}
+
 variable "route53_zone_name" {
   description = "Public Route 53 hosted zone name that manages the application domain, such as example.com."
   type        = string
@@ -110,51 +117,11 @@ variable "frontend_desired_count" {
   default     = 1
 }
 
-variable "db_name" {
-  description = "RDS database name."
-  type        = string
-}
-
-variable "db_username" {
-  description = "RDS master username."
-  type        = string
-}
-
-variable "db_password" {
-  description = "RDS master password."
-  type        = string
-  sensitive   = true
-}
-
-variable "db_instance_class" {
-  description = "RDS instance class."
-  type        = string
-  default     = "db.t4g.micro"
-}
-
-variable "db_allocated_storage" {
-  description = "Allocated storage for RDS in GiB."
-  type        = number
-  default     = 20
-}
-
-variable "db_engine_version" {
-  description = "Optional PostgreSQL engine version. Leave null to let AWS choose a supported default."
+variable "dynamodb_table_name" {
+  description = "Application DynamoDB table name."
   type        = string
   default     = null
   nullable    = true
-}
-
-variable "db_port" {
-  description = "Database port."
-  type        = number
-  default     = 5432
-}
-
-variable "rds_skip_final_snapshot" {
-  description = "Skip the final snapshot on destroy."
-  type        = bool
-  default     = true
 }
 
 variable "s3_force_destroy" {
@@ -205,7 +172,7 @@ variable "codebuild_compute_type" {
 variable "cloudwatch_log_retention_days" {
   description = "Retention period for CloudWatch log groups."
   type        = number
-  default     = 14
+  default     = 7
 }
 
 variable "tags" {

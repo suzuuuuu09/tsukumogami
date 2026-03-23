@@ -5,22 +5,17 @@ output "nlb_dns_name" {
 
 output "frontend_url" {
   value       = "https://${var.app_domain_name}"
-  description = "Public HTTPS URL for the frontend."
+  description = "Public HTTPS URL for the CloudFront frontend."
 }
 
 output "backend_url" {
-  value       = "https://${var.app_domain_name}:${var.backend_container_port}"
+  value       = "https://${local.backend_domain_name}"
   description = "Public HTTPS URL for the backend."
 }
 
 output "backend_ecr_repository_url" {
   value       = aws_ecr_repository.backend.repository_url
   description = "ECR repository URL for the backend image."
-}
-
-output "frontend_ecr_repository_url" {
-  value       = aws_ecr_repository.frontend.repository_url
-  description = "ECR repository URL for the frontend image."
 }
 
 output "ecs_cluster_name" {
@@ -33,14 +28,9 @@ output "backend_service_name" {
   description = "ECS backend service name."
 }
 
-output "frontend_service_name" {
-  value       = aws_ecs_service.frontend.name
-  description = "ECS frontend service name."
-}
-
-output "rds_endpoint" {
-  value       = aws_db_instance.postgres.address
-  description = "RDS endpoint hostname."
+output "dynamodb_table_name" {
+  value       = aws_dynamodb_table.app_data.name
+  description = "DynamoDB table name used by the application."
 }
 
 output "pipeline_name" {
@@ -56,6 +46,16 @@ output "artifact_bucket_name" {
 output "app_bucket_name" {
   value       = aws_s3_bucket.app_storage.bucket
   description = "S3 bucket name used by the application."
+}
+
+output "frontend_bucket_name" {
+  value       = aws_s3_bucket.frontend.bucket
+  description = "S3 bucket name used by the frontend site."
+}
+
+output "cloudfront_distribution_id" {
+  value       = aws_cloudfront_distribution.frontend.id
+  description = "CloudFront distribution ID for the frontend site."
 }
 
 output "codestar_connection_arn" {

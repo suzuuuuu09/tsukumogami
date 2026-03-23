@@ -34,13 +34,18 @@ resource "aws_codebuild_project" "containers" {
     }
 
     environment_variable {
-      name  = "FRONTEND_ECR_URI"
-      value = aws_ecr_repository.frontend.repository_url
+      name  = "FRONTEND_BUCKET"
+      value = aws_s3_bucket.frontend.bucket
+    }
+
+    environment_variable {
+      name  = "FRONTEND_DISTRIBUTION_ID"
+      value = aws_cloudfront_distribution.frontend.id
     }
 
     environment_variable {
       name  = "FRONTEND_API_BASE"
-      value = "https://${var.app_domain_name}:${var.backend_container_port}"
+      value = ""
     }
   }
 
@@ -121,22 +126,6 @@ resource "aws_codepipeline" "main" {
         ClusterName = aws_ecs_cluster.main.name
         ServiceName = aws_ecs_service.backend.name
         FileName    = "backend-imagedefinitions.json"
-      }
-    }
-
-    action {
-      name            = "DeployFrontend"
-      category        = "Deploy"
-      owner           = "AWS"
-      provider        = "ECS"
-      version         = "1"
-      input_artifacts = ["BuildArtifact"]
-      run_order       = 1
-
-      configuration = {
-        ClusterName = aws_ecs_cluster.main.name
-        ServiceName = aws_ecs_service.frontend.name
-        FileName    = "frontend-imagedefinitions.json"
       }
     }
   }
