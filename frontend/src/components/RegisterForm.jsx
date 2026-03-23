@@ -1,3 +1,5 @@
+import { BrowserMultiFormatReader } from '@zxing/browser';
+import { useEffect, useRef, useState } from 'react';
 function RegisterForm({
   barcode,
   purchaseDate,
@@ -7,11 +9,35 @@ function RegisterForm({
   onPurchaseDateChange,
   onSubmit,
 }) {
+  const videoRef = useRef(null);
+  const [code, setCode] = useState('');
+
+    
+  const codeRead = () => {
+    const codeReader = new BrowserMultiFormatReader();
+
+    codeReader.decodeFromVideoDevice(
+      null,
+      videoRef.current,
+      (result, err) => {
+        if (result) {
+          const text = result.getText();
+          setCode(text);
+        }
+      }
+    );
+
+    return () => codeReader.reset();
+  };
   return (
     <div className="form">
       <label>バーコード(JAN)</label>
+      <div ref={videoRef} style={{ width: '100%', height: '200px' }}></div>
+      <button type="button" onClick={codeRead}>
+        カメラでスキャン
+      </button>
       <input
-        value={barcode}
+        value={code}
         onChange={(event) => onBarcodeChange(event.target.value)}
         placeholder="例: 4901234567896"
       />
