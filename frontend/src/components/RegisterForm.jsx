@@ -37,7 +37,7 @@ function RegisterForm({
         カメラでスキャン
       </button>
       <input
-        value={code}
+        value={code || barcode}
         onChange={(event) => onBarcodeChange(event.target.value)}
         placeholder="例: 4901234567896"
       />
