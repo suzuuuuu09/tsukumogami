@@ -3,9 +3,10 @@ import cv2
 import numpy as np
 import requests
 from pyzbar.pyzbar import decode
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime, timezone
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request
+from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 
 load_dotenv()
@@ -26,6 +27,9 @@ CORS(
     },
 )
 
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://app.db'
+app.congig['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
 
 class APIError(Exception):
     def __init__(self, status_code: int, detail: str) -> None:
