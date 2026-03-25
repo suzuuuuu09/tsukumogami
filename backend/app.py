@@ -1,18 +1,23 @@
 import os
+from datetime import date, timedelta
+
 import cv2
 import numpy as np
 import requests
-from pyzbar.pyzbar import decode
-from datetime import date, timedelta
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from pyzbar.pyzbar import decode
+
+from routes.tsukumogami import tsukumogami_bp
 
 load_dotenv()
 
 YAHOO_APP_ID = os.getenv("YAHOO_APP_ID")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-DEFAULT_YAHOO_ITEM_SEARCH_URL = "https://shopping.yahooapis.jp/ShoppingWebService/V3/itemSearch"
+DEFAULT_YAHOO_ITEM_SEARCH_URL = (
+    "https://shopping.yahooapis.jp/ShoppingWebService/V3/itemSearch"
+)
 
 app = Flask(__name__)
 CORS(
@@ -25,6 +30,7 @@ CORS(
         }
     },
 )
+app.register_blueprint(tsukumogami_bp)
 
 
 class APIError(Exception):
@@ -129,27 +135,30 @@ def get_yahoo_item(jan_code: str, request_url: str | None = None) -> dict:
 
     return hits[0]
 
+
 ### added ###
 def decode_barcode_from_image(file) -> dict:
     file_bytes = np.frombuffer(file.read(), np.uint8)
     img = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
 
     if img is None:
-        raise APIError(400, "The image could not be loaded correctly. Please check the image format")
-    
+        raise APIError(
+            400,
+            "The image could not be loaded correctly. Please check the image format",
+        )
+
     barcodes = decode(img)
     if not barcodes:
         raise APIError(404, "Barcode is not detected from the image")
 
-    barcode_data = barcodes[0].data.decode('utf-8')
+    barcode_data = barcodes[0].data.decode("utf-8")
     barcode_type = barcodes[0].type
 
-    return {
-        "barcode": barcode_data,
-        "type": barcode_type
-    }
+    return {"barcode": barcode_data, "type": barcode_type}
+
 
 ### added ###
+
 
 def infer_deadline_reason(
     product_name: str,
@@ -184,7 +193,9 @@ def infer_deadline_reason(
                 candidates = result.get("candidates", [])
                 if candidates and isinstance(candidates[0], dict):
                     content = candidates[0].get("content", {})
-                    parts = content.get("parts", []) if isinstance(content, dict) else []
+                    parts = (
+                        content.get("parts", []) if isinstance(content, dict) else []
+                    )
                     text = " ".join(
                         part.get("text", "")
                         for part in parts
@@ -244,7 +255,9 @@ def estimate():
     description = item.get("description", "")
     category = guess_category(product_name, f"{description} {genre_text}")
     suggested_expiration = estimate_expiration_date(category, purchase_date)
-    reason = infer_deadline_reason(product_name, category, purchase_date, suggested_expiration)
+    reason = infer_deadline_reason(
+        product_name, category, purchase_date, suggested_expiration
+    )
 
     return jsonify(
         {
@@ -256,13 +269,14 @@ def estimate():
         }
     )
 
+
 ### added ###
-@app.post("/api/scan-barcode") #あとで決める
+@app.post("/api/scan-barcode")  # あとで決める
 def scan_barcode():
     if "image" not in request.files:
         raise APIError(400, "Not included the 'image' key")
-    
-    file = request.files['image']
+
+    file = request.files["image"]
 
     try:
         result = decode_barcode_from_image(file)
@@ -270,8 +284,10 @@ def scan_barcode():
         raise
     except Exception as exc:
         raise APIError(500, f"An unexpected error has occurred: {exc}") from exc
-    
+
     return jsonify(result)
+
+
 ### added ###
 
 if __name__ == "__main__":
