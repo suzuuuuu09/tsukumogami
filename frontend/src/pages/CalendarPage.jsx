@@ -32,7 +32,7 @@ function CalendarPage({ calendarMonth, itemsByDate, monthlyEntries, savedEntries
       </div>
 
       {savedEntries.length === 0 ? (
-        <div className="empty-state">登録品がまだありません。まずは賞味期限を登録してカレンダーを表示しましょう。</div>
+        <div className="empty-state">登録品がまだありません。まずは交換期限を登録してカレンダーを表示しましょう。</div>
       ) : (
         <div className="calendar-layout">
           <CalendarGrid

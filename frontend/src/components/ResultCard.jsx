@@ -10,7 +10,7 @@ function ResultCard({ result, resultYokai }) {
 
   return (
     <div className="result">
-      <div className="smoke">妖怪と賞味期限を見抜きました</div>
+      <div className="smoke">交換期限が記録されました</div>
       <div className="yokai-appear">
         <video
           className="yokai-appear-bg"
@@ -38,7 +38,7 @@ function ResultCard({ result, resultYokai }) {
         <small>{result.category}</small>
       </p>
       <p className="expiry">
-        ・賞味期限
+        ・交換期限
         <br />
         <small>{formatDisplayDate(result.suggested_expiration)}</small>
       </p>

@@ -148,7 +148,7 @@ function RegisterForm({
       />
 
       <button type="button" onClick={onSubmit}>
-        賞味期限を登録
+        交換期限を登録
       </button>
 
       {status && <div className="status">{status}</div>}
