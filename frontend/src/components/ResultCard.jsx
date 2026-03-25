@@ -28,7 +28,7 @@ function ResultCard({ result, resultYokai }) {
       </div>
       <h2>物品情報</h2>
       <p className="product">
-        ・付喪神
+        ・物品名
         <br />
         <small>{result.product_name}</small>
       </p>

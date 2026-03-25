@@ -84,8 +84,8 @@ function CalendarGrid({ calendarMonth, itemsByDate, focusDate, onEntryComplete }
         <div className="calendar-grid calendar-days">
           {calendarDays.map((day) => {
             const dayItems = itemsByDate[day.iso] || []
-            const visibleItems = dayItems.slice(0, 4)
-            const hiddenItems = dayItems.slice(4)
+            const visibleItems = dayItems.slice(0, 2)
+            const hiddenItems = dayItems.slice(2)
             const isCompletedDay = dayItems.length > 0 && dayItems.every((entry) => entry.completed)
             const stampSrc = isCompletedDay ? '/tassei.png' : '/mitatsu.png'
             const stampAlt = isCompletedDay ? '達成' : '未達'
@@ -153,7 +153,7 @@ function CalendarGrid({ calendarMonth, itemsByDate, focusDate, onEntryComplete }
             </button>
             <div className="calendar-modal-content">
               <p className="calendar-modal-kicker">{formatDisplayDate(overflowEntries.iso)}</p>
-              <h3 className="calendar-modal-title">その他の期限</h3>
+              <h3 className="calendar-modal-title">交換期限</h3>
               <div className="calendar-overflow-list">
                 {overflowEntries.entries.map((entry) => {
                   const yokai = getEntryYokai(entry)
