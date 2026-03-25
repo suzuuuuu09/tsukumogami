@@ -32,6 +32,7 @@ function RegisterForm({
   const startCamera = async () => {
     if (streamRef.current) {
       setIsCameraActive(true)
+      setCameraError('')
       return
     }
 
@@ -50,12 +51,12 @@ function RegisterForm({
       setIsCameraActive(true)
     } catch (err) {
       console.error('カメラの起動に失敗しました:', err)
-      setCameraError('カメラの利用が許可されていないか、デバイスが見つかりません。')
+      setCameraError('カメラを起動できませんでした。端末の権限設定を確認してください。')
     }
   }
 
   const captureAndSend = () => {
-    if (!videoRef.current || !canvasRef.current) return
+    if (!videoRef.current || !canvasRef.current || !isCameraActive) return
 
     setIsScanning(true)
     setResult(null)
@@ -69,8 +70,6 @@ function RegisterForm({
     canvas.height = video.videoHeight
     context.drawImage(video, 0, 0, canvas.width, canvas.height)
 
-
-    
     canvas.toBlob(async (blob) => {
       if (!blob) {
         setCameraError('画像の生成に失敗しました。')
@@ -96,7 +95,7 @@ function RegisterForm({
           setCameraError(data.detail || 'バーコードの読み取りに失敗しました。')
         }
       } catch (err) {
-        console.error('通信エラー:', err)
+        console.error('送信エラー:', err)
         setCameraError('サーバーとの通信に失敗しました。')
       } finally {
         setIsScanning(false)
@@ -106,58 +105,54 @@ function RegisterForm({
 
   return (
     <div className="form">
-      <label>バーコード(JAN)</label>
-      <div style={{ position: 'relative', width: '100%', aspectRatio: '4 / 3', backgroundColor: '#000' }}>
-        <video
-          ref={videoRef}
-          autoPlay
-          playsInline
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-        />
-      </div>
-      <canvas ref={canvasRef} style={{ display: 'none' }} />
-      <button
-        type="button"
-        onClick={startCamera}
-        style={{
-          marginTop: '20px',
-          padding: '12px 24px',
-          fontSize: '16px',
-          cursor: 'pointer',
-        }}
-      >
-        {isCameraActive ? 'カメラ起動中' : 'カメラを起動'}
-      </button>
-      <button
-        type="button"
-        onClick={captureAndSend}
-        disabled={!isCameraActive || isScanning}
-        style={{
-          marginTop: '12px',
-          padding: '12px 24px',
-          fontSize: '16px',
-          cursor: !isCameraActive || isScanning ? 'not-allowed' : 'pointer',
-        }}
-      >
-        {isScanning ? '読み取り中...' : 'バーコードを撮影'}
-      </button>
+      <label>バーコード（JAN）</label>
 
+      <div className={`camera-accordion ${isCameraActive ? 'is-open' : ''}`}>
+        <button type="button" className="camera-trigger" onClick={startCamera}>
+          <span className="camera-trigger-label">
+            {isCameraActive ? 'カメラ起動中' : 'カメラを起動'}
+          </span>
+        </button>
+
+        <div className="camera-scroll" aria-hidden={!isCameraActive}>
+          <div className="camera-scroll-inner">
+            <div className="camera-preview-frame">
+              <video ref={videoRef} autoPlay playsInline className="camera-preview" />
+            </div>
+            <button
+              type="button"
+              className="camera-capture-button"
+              onClick={captureAndSend}
+              disabled={!isCameraActive || isScanning}
+            >
+              {isScanning ? '読み取り中...' : 'バーコードを撮影'}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <canvas ref={canvasRef} className="camera-canvas" />
+
+      <label>バーコードを読み込めない場合は手動で入力してください</label>
       <input
         value={barcode || result?.barcode || ''}
         onChange={(event) => onBarcodeChange(event.target.value)}
         placeholder="例: 4901234567896"
       />
+
       <label>購入日</label>
       <input
         type="date"
         value={purchaseDate}
         onChange={(event) => onPurchaseDateChange(event.target.value)}
       />
+
       <button type="button" onClick={onSubmit}>
-        期限を登録
+        賞味期限を登録
       </button>
+
       {status && <div className="status">{status}</div>}
-      {(error || cameraError) && <div className="error">{error || cameraError}</div>}
+      {(error || cameraError) && <div className="error">登録に失敗しました</div>}
     </div>
   )
 }

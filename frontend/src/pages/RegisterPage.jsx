@@ -13,6 +13,7 @@ function RegisterPage({
   resultYokai,
   savedEntries,
   upcomingEntry,
+  onMoveToRegisteredDate,
   onBarcodeChange,
   onPurchaseDateChange,
   onSubmit,
@@ -22,7 +23,7 @@ function RegisterPage({
       <PageHeader
         title="バーコードを読み取り交換期限を登録"
         subtitle="付喪神と共に物品を記録して、交換期限をお知らせします。"
-        badge={{ variant: 'image', yokai: headerYokai, label: `${headerYokai}が出現` }}
+        badge={{ variant: 'image', yokai: headerYokai, label: `${headerYokai}` }}
       />
 
       <RegistrationSummary savedEntriesCount={savedEntries.length} upcomingEntry={upcomingEntry} />
@@ -38,6 +39,12 @@ function RegisterPage({
       />
 
       <ResultCard result={result} resultYokai={resultYokai} />
+
+      {result && (
+        <button type="button" className="calendar-jump-button" onClick={onMoveToRegisteredDate}>
+          カレンダーへ移動
+        </button>
+      )}
     </div>
   )
 }

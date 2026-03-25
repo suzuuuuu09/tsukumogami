@@ -127,6 +127,27 @@
   gap: 20px;
 }
 
+.calendar-jump-button {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 15;
+  width: auto;
+  max-width: min(280px, calc(100vw - 32px));
+  margin-top: 0;
+  padding: 14px 18px;
+  background:
+    linear-gradient(rgba(244, 239, 223, 0.96), rgba(244, 239, 223, 0.96)),
+    var(--gold-texture);
+  background-size: auto, cover;
+  background-position: center, center;
+  color: var(--sumi);
+  border-color: transparent;
+  border-image-source: var(--gold-texture);
+  border-image-slice: 120;
+  box-shadow: 6px 6px 0 rgba(79, 49, 12, 0.3);
+}
+
 .nav {
   display: flex;
   flex-direction: row;
@@ -341,6 +362,114 @@ h1 {
 
 .form { display: grid; gap: 16px; margin-top: 12px; }
 
+.camera-accordion {
+  display: grid;
+  width: 100%;
+  gap: 0;
+}
+
+.camera-trigger {
+  width: 100%;
+  margin-top: 0;
+  padding: 14px 18px;
+  writing-mode: horizontal-tb;
+  letter-spacing: 0.14em;
+  background-size: auto, 220px auto;
+  background-position: center, center;
+  color: var(--kin);
+  box-shadow: 4px 4px 0 var(--shu);
+  position: relative;
+  z-index: 1;
+}
+
+.camera-trigger-label {
+  display: inline-block;
+}
+
+.camera-scroll {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition:
+    max-height 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.24s ease;
+  background:
+    linear-gradient(180deg, rgba(244, 239, 223, 0.98), rgba(226, 211, 173, 0.95)),
+    url('/japanese-paper.jpg');
+  background-size: auto, 520px auto;
+  background-position: center, center;
+  border-left: 2px solid rgba(79, 49, 12, 0.22);
+  border-right: 2px solid rgba(79, 49, 12, 0.22);
+  border-bottom: 2px solid rgba(79, 49, 12, 0.22);
+  position: relative;
+}
+
+.camera-scroll::before,
+.camera-scroll::after {
+  content: "";
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  height: 14px;
+  box-shadow: inset 0 0 0 1px rgba(255, 241, 204, 0.16);
+}
+
+.camera-scroll::before {
+  top: 0;
+}
+
+.camera-scroll::after {
+  bottom: 0;
+}
+
+.camera-accordion.is-open .camera-scroll {
+  max-height: 680px;
+  opacity: 1;
+}
+
+.camera-scroll-inner {
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  padding: 28px 18px;
+  display: grid;
+  gap: 14px;
+  align-content: start;
+  justify-items: center;
+}
+
+.camera-preview-frame {
+  width: 100%;
+  max-width: 520px;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(18, 15, 15, 0.96), rgba(45, 26, 14, 0.94)),
+    radial-gradient(circle at center, rgba(204, 53, 40, 0.2), transparent 55%);
+  box-shadow: inset 0 0 0 1px rgba(255, 240, 214, 0.08);
+}
+
+.camera-preview {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.camera-capture-button {
+  margin-top: 0;
+  width: min(320px, 100%);
+}
+
+.camera-capture-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+
+.camera-canvas {
+  display: none;
+}
+
 .summary-strip {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -379,7 +508,7 @@ label {
 input { 
   border: none;
   border-bottom: 2px solid var(--sumi); 
-  background: rgba(0,0,0,0.03); 
+  background: rgba(255,255,255,0.25); 
   color: var(--sumi); 
   padding: 10px; 
   font-family: inherit;
@@ -391,6 +520,26 @@ input {
 }
 
 @media (max-width: 768px) {
+  .calendar-jump-button {
+    right: 12px;
+    bottom: 12px;
+    padding: 12px 14px;
+    max-width: calc(100vw - 24px);
+    box-shadow: 4px 4px 0 rgba(79, 49, 12, 0.26);
+  }
+
+  .camera-trigger {
+    padding: 12px 14px;
+  }
+
+  .camera-accordion.is-open .camera-scroll {
+    max-height: 420px;
+  }
+
+  .camera-scroll-inner {
+    padding: 24px 14px;
+  }
+
   input {
     font-size: 16px;
     padding: 8px;
@@ -433,7 +582,7 @@ button {
 button:hover { 
   transform: translate(2px, 2px);
   box-shadow: 2px 2px 0 var(--shu);
-  color: var(--washi);
+  color: var(--shu);
 }
 
 .status { margin-top: 8px; color: var(--ruri); font-size: 0.9rem; font-weight: 700; }
@@ -463,15 +612,41 @@ button:hover {
 
 /* 妖怪が出現するアニメーション領域 */
 .yokai-appear {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 16px 12px;
+  border: 2px solid var(--shu);
+  border-radius: 2px;
+  background-color: #000000;
+}
+
+.yokai-appear-bg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(240px, 72%);
+  height: min(240px, 72%);
+  object-fit: cover;
+  object-position: center;
+  opacity: 0.92;
+  pointer-events: none;
+  z-index: 0;
+  filter: saturate(1.05) brightness(1.02);
+}
+
+.yokai-appear-content {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  margin-bottom: 20px;
-  padding: 12px;
-  border: 2px solid var(--shu);
-  border-radius: 2px;
-  background: rgba(204, 53, 40, 0.08);
+  width: 100%;
+  padding: 8px 0;
 }
 
 .yokai-display {
@@ -487,6 +662,16 @@ button:hover {
   .yokai-display {
     width: 80px;
     height: 80px;
+  }
+
+  .yokai-appear {
+    padding: 12px 8px;
+  }
+
+  .yokai-appear-bg {
+    width: min(180px, 78%);
+    height: min(180px, 78%);
+    transform: translate(-50%, -54%);
   }
 }
 
@@ -600,6 +785,11 @@ button:hover {
   box-shadow: inset 0 0 0 1px var(--shu);
 }
 
+.calendar-cell.target-date {
+  border-color: rgba(220, 179, 84, 0.92);
+  box-shadow: inset 0 0 0 2px rgba(220, 179, 84, 0.5), 0 0 0 2px rgba(220, 179, 84, 0.16);
+}
+
 .calendar-cell-head {
   display: flex;
   align-items: center;
@@ -613,17 +803,50 @@ button:hover {
 }
 
 .calendar-count {
-  font-size: 0.75rem;
-  font-weight: 800;
-  color: #4a3008;
-  background-size: auto, cover;
-  background-position: center, center;
-  padding: 2px 8px;
+  flex-shrink: 0;
+}
+
+.calendar-stamp {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  filter: drop-shadow(1px 2px 2px rgba(79, 49, 12, 0.18));
 }
 
 .calendar-events {
   display: grid;
   gap: 6px;
+}
+
+.calendar-yokai-events {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.calendar-yokai-button {
+  margin: 0;
+  width: 100%;
+  padding: 6px;
+  border: none;
+  background:
+    none;
+  background-size: auto, 220px auto;
+  color: var(--sumi);
+  box-shadow: none;
+  letter-spacing: 0;
+}
+
+.calendar-yokai-button:hover {
+  transform: translate(1px, 1px);
+  box-shadow: 1px 1px 0 rgba(79, 49, 12, 0.22);
+  color: var(--sumi);
+}
+
+
+.calendar-yokai-icon {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+  display: block;
 }
 
 .calendar-event,
@@ -639,37 +862,329 @@ button:hover {
 }
 
 .calendar-more {
-  border-left-color: var(--kin);
-  background: rgba(220, 179, 84, 0.18);
+  width: 100px;
+  margin-top: 0;
+  border: none;
+  background: none;
+  box-shadow: none;
+  color: #6a4a12;
+}
+
+.calendar-more:hover {
+  color: #6a4a12;
+  box-shadow: none;
+}
+.hanko-pop {
+  animation: hanko 0.65s ease-out;
+}
+
+.calendar-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 21, 21, 0.52);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  z-index: 20;
+}
+
+.calendar-modal {
+  position: relative;
+  width: min(560px, 100%);
+  border: 3px solid rgba(79, 49, 12, 0.22);
+  background:
+    linear-gradient(180deg, rgba(255, 251, 242, 0.98), rgba(239, 228, 198, 0.95)),
+    url('/japanese-paper.jpg');
+  background-size: auto, 620px auto;
+  box-shadow: 16px 16px 0 rgba(26, 21, 21, 0.24);
+  padding: 20px;
+}
+
+.calendar-modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: auto;
+  margin-top: 0;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  color: var(--sumi);
+  font-size: 1.5rem;
+}
+
+.calendar-modal-close:hover {
+  transform: none;
+  box-shadow: none;
+  color: var(--shu);
+}
+
+.calendar-modal-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-right: 36px;
+}
+
+.calendar-modal-yokai {
+  width: min(180px, 42vw);
+  aspect-ratio: 1;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 12px rgba(26, 21, 21, 0.2));
+}
+
+.calendar-modal-stamp-wrap {
+  flex-shrink: 0;
+}
+
+.calendar-modal-stamp {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+}
+
+.calendar-modal-content {
+  display: grid;
+  gap: 8px;
+}
+
+.calendar-overflow-modal {
+  width: min(520px, 100%);
+}
+
+.calendar-overflow-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.calendar-overflow-item {
+  margin-top: 0;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 68px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  background:
+    linear-gradient(180deg, rgba(255, 249, 238, 0.96), rgba(236, 225, 197, 0.92)),
+    url('/japanese-paper.jpg');
+  background-size: auto, 280px auto;
+  color: var(--sumi);
+  letter-spacing: 0;
+}
+
+.calendar-overflow-item:hover {
+  color: var(--sumi);
+}
+
+.calendar-overflow-icon {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+  display: block;
+}
+
+.calendar-overflow-copy {
+  display: grid;
+  gap: 4px;
+  text-align: left;
+}
+
+.calendar-overflow-copy strong {
+  font-size: 1rem;
+}
+
+.calendar-overflow-copy span {
+  font-size: 0.9rem;
+  color: #5a5145;
+}
+
+.calendar-modal-kicker {
+  margin: 0;
+  color: var(--shu);
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+
+.calendar-modal-title {
+  margin: 0;
+  font-size: 1.4rem;
+  color: var(--sumi);
+}
+
+.calendar-modal-meta,
+.calendar-modal-reason {
+  margin: 0;
+  color: #4f4f4f;
+  line-height: 1.5;
+}
+
+.calendar-modal-reason {
+  margin-top: 4px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(79, 49, 12, 0.16);
+}
+
+.calendar-complete-button {
+  margin-top: 10px;
 }
 
 .calendar-sidebar {
   border: 2px solid rgba(26, 21, 21, 0.2);
-  background: rgba(26, 21, 21, 0.04);
+  background:
+    linear-gradient(180deg, rgba(255, 249, 238, 0.94), rgba(234, 224, 199, 0.88)),
+    url('/japanese-paper.jpg');
+  background-size: cover, 620px auto;
+  background-position: center, center;
   padding: 18px;
   display: grid;
   align-content: start;
-  gap: 14px;
+  gap: 18px;
+  box-shadow: inset 0 0 0 1px rgba(130, 96, 44, 0.15);
 }
 
 .calendar-sidebar h2 {
   margin: 0;
   color: var(--sumi);
+  font-size: 1.15rem;
+  letter-spacing: 0.06em;
 }
 
 .deadline-list {
   display: grid;
-  gap: 14px;
+  gap: 18px;
 }
 
 .deadline-item {
-  border-bottom: 1px solid rgba(26, 21, 21, 0.14);
-  padding-bottom: 14px;
+  position: relative;
+  overflow: hidden;
+  border: 2px solid rgba(68, 43, 21, 0.2);
+  background:
+    linear-gradient(180deg, rgba(255, 252, 246, 0.96), rgba(241, 232, 208, 0.92)),
+    radial-gradient(circle at top right, rgba(204, 53, 40, 0.12), transparent 30%),
+    url('/japanese-paper.jpg');
+  background-size: auto, auto, 480px auto;
+  background-position: center, top right, center;
+  box-shadow:
+    0 8px 18px rgba(49, 33, 22, 0.12),
+    inset 0 0 0 1px rgba(220, 179, 84, 0.18);
+  transition:
+    transform 0.35s ease,
+    box-shadow 0.35s ease,
+    border-color 0.35s ease;
 }
 
-.deadline-item:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
+.deadline-item::before {
+  content: "";
+  position: absolute;
+  inset: 10px;
+  border: 1px solid rgba(130, 96, 44, 0.14);
+  pointer-events: none;
+}
+
+.deadline-item:hover {
+  transform: translateY(-4px) rotate(-0.6deg);
+  border-color: rgba(204, 53, 40, 0.4);
+  box-shadow:
+    0 12px 24px rgba(49, 33, 22, 0.18),
+    inset 0 0 0 1px rgba(220, 179, 84, 0.3);
+}
+
+.deadline-card-header {
+  position: relative;
+  height: 190px;
+  overflow: hidden;
+  border-bottom: 2px solid rgba(68, 43, 21, 0.12);
+  transition: height 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  background:
+    linear-gradient(180deg, var(--shu), rgba(0, 0, 0, 0.92)),
+    radial-gradient(circle at top right, rgba(204, 53, 40, 0.12), transparent 30%),
+    url('/japanese-paper.jpg');
+}
+
+.deadline-item:hover .deadline-card-header {
+  height: 112px;
+}
+
+.deadline-card-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  padding: 18px 22px 10px;
+  filter: drop-shadow(0 14px 18px rgba(18, 15, 15, 0.28));
+  background: transparent;
+  transform: scale(1);
+  transition:
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.45s ease;
+}
+
+.deadline-item:hover .deadline-card-image {
+  transform: scale(0.76) translateY(8px);
+  filter: drop-shadow(0 10px 14px rgba(18, 15, 15, 0.18));
+}
+
+.deadline-card-crest {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 1;
+  width: 62px;
+  height: 62px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(204, 53, 40, 0.92);
+  color: #fff7ea;
+  font-size: 1.1rem;
+  font-weight: 800;
+  box-shadow: 0 0 0 3px rgba(255, 247, 230, 0.3);
+}
+
+.deadline-card-crest-image {
+  overflow: hidden;
+  padding: 3px;
+  background:
+    linear-gradient(180deg, rgba(255, 249, 238, 0.98), rgba(240, 228, 197, 0.92)),
+    rgba(204, 53, 40, 0.92);
+}
+
+.deadline-card-crest-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 999px;
+  display: block;
+  filter: contrast(1.04) saturate(0.94);
+}
+
+.deadline-card-body {
+  position: relative;
+  z-index: 1;
+  height: 104px;
+  padding: 16px 18px 18px;
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  transition: height 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.deadline-item:hover .deadline-card-body {
+  height: 214px;
+}
+
+.deadline-kicker {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.24em;
+  color: rgba(79, 49, 12, 0.7);
 }
 
 .deadline-date,
@@ -682,12 +1197,33 @@ button:hover {
 .deadline-date {
   color: var(--shu);
   font-weight: 800;
-  margin-bottom: 6px;
+  margin-bottom: 2px;
+  font-size: 1.15rem;
 }
 
 .deadline-name {
   font-weight: 800;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
+  color: var(--sumi);
+  font-size: 1.02rem;
+  line-height: 1.4;
+}
+
+.deadline-card-details {
+  margin-top: 10px;
+  display: grid;
+  gap: 6px;
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 0.28s ease,
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.deadline-item:hover .deadline-card-details {
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: 0.14s;
 }
 
 .deadline-meta,
@@ -743,6 +1279,73 @@ button:hover {
   .calendar-more {
     font-size: 0.7rem;
     padding: 4px 6px;
+  }
+
+  .calendar-yokai-events {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px;
+  }
+
+  .calendar-yokai-button {
+    padding: 4px;
+  }
+
+  .calendar-stamp {
+    width: 32px;
+    height: 32px;
+  }
+
+  .calendar-modal {
+    padding: 16px;
+  }
+
+  .calendar-overflow-item {
+    grid-template-columns: 56px minmax(0, 1fr);
+    gap: 10px;
+    padding: 8px 10px;
+  }
+
+  .calendar-modal-hero {
+    align-items: flex-start;
+  }
+
+  .calendar-modal-stamp {
+    width: 72px;
+    height: 72px;
+  }
+
+  .calendar-sidebar {
+    padding: 14px;
+  }
+
+  .deadline-card-header {
+    height: 150px;
+  }
+
+  .deadline-item:hover .deadline-card-header {
+    height: 100px;
+  }
+
+  .deadline-card-body {
+    height: 96px;
+    padding: 14px;
+  }
+
+  .deadline-item:hover .deadline-card-body {
+    height: 198px;
+  }
+
+  .deadline-date {
+    font-size: 1rem;
+  }
+
+  .deadline-card-image {
+    padding: 14px 18px 8px;
+  }
+
+  .deadline-card-crest {
+    width: 56px;
+    height: 56px;
   }
 }
 

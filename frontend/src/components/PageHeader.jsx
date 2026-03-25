@@ -19,7 +19,7 @@ function PageHeader({ title, subtitle, badge }) {
     <div>
       {badges.length > 0 && (
         <div className="header-badges" aria-hidden="true">
-          {badges.filter(badgeItem => !badgeItem.label.includes("期限")).map((badgeItem, index) => {
+          {badges.filter(badgeItem => !badgeItem.label.includes("月次")).map((badgeItem, index) => {
             const isImageBadge = badgeItem.variant === 'image' && badgeItem.yokai
 
             return (

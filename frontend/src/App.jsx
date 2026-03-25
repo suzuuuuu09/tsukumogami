@@ -26,6 +26,7 @@ function App() {
   const [activePage, setActivePage] = useState('register')
   const [calendarMonth, setCalendarMonth] = useState(getInitialCalendarMonth)
   const [savedEntries, setSavedEntries] = useState(loadSavedEntries)
+  const [calendarFocusDate, setCalendarFocusDate] = useState(null)
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -38,6 +39,14 @@ function App() {
   useEffect(() => {
     saveSavedEntries(savedEntries)
   }, [savedEntries])
+
+  useEffect(() => {
+    setBarcode('')
+    setStatus('')
+    setResult(null)
+    setError('')
+    setResultYokai(yokaiList[0])
+  }, [activePage])
 
   const handleSubmit = async () => {
     try {
@@ -65,7 +74,8 @@ function App() {
       const estimate = await requestExpirationEstimate({ barcode, purchaseDate })
 
       setResult(estimate)
-      setSavedEntries((prev) => [createSavedEntry({ barcode, purchaseDate, estimate }), ...prev])
+      setSavedEntries((prev) => [createSavedEntry({ barcode, purchaseDate, estimate, yokai: newYokai }), ...prev])
+      setCalendarFocusDate(estimate.suggested_expiration)
 
       const expirationDate = parseISODate(estimate.suggested_expiration)
       setCalendarMonth(new Date(expirationDate.getFullYear(), expirationDate.getMonth(), 1))
@@ -76,10 +86,33 @@ function App() {
     }
   }
 
+  const handleEntryComplete = (entryId) => {
+    setSavedEntries((prev) =>
+      prev.map((entry) =>
+        entry.id === entryId
+          ? {
+              ...entry,
+              completed: true,
+              completedAt: toISODate(new Date()),
+            }
+          : entry,
+      ),
+    )
+  }
+
   const itemsByDate = getItemsByDate(savedEntries)
   const monthlyEntries = getMonthlyEntries(savedEntries, calendarMonth)
   const upcomingEntry = getUpcomingEntry(savedEntries)
 
+  const handleMoveToRegisteredDate = () => {
+    if (!calendarFocusDate) {
+      return
+    }
+
+    const focusDate = parseISODate(calendarFocusDate)
+    setCalendarMonth(new Date(focusDate.getFullYear(), focusDate.getMonth(), 1))
+    setActivePage('calendar')
+  }
 
   return (
     <div className="app">
@@ -97,6 +130,7 @@ function App() {
             resultYokai={resultYokai}
             savedEntries={savedEntries}
             upcomingEntry={upcomingEntry}
+            onMoveToRegisteredDate={handleMoveToRegisteredDate}
             onBarcodeChange={setBarcode}
             onPurchaseDateChange={setPurchaseDate}
             onSubmit={handleSubmit}
@@ -107,6 +141,8 @@ function App() {
             itemsByDate={itemsByDate}
             monthlyEntries={monthlyEntries}
             savedEntries={savedEntries}
+            focusDate={calendarFocusDate}
+            onEntryComplete={handleEntryComplete}
             onMoveMonth={(offset) => {
               setCalendarMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() + offset, 1))
             }}
