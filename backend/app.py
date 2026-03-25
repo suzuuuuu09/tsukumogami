@@ -28,7 +28,7 @@ CORS(
 )
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite://app.db'
-app.congig['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 class APIError(Exception):
