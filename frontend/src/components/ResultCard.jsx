@@ -26,9 +26,9 @@ function ResultCard({ result, resultYokai }) {
           <p className="yokai-text">{resultYokai}が出現した！</p>
         </div>
       </div>
-      <h2>妖怪診断結果</h2>
+      <h2>物品情報</h2>
       <p className="product">
-        ・妖怪候補
+        ・付喪神
         <br />
         <small>{result.product_name}</small>
       </p>
