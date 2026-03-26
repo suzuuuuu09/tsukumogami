@@ -238,7 +238,7 @@ def get_tasks():
 ##特定のタスクのリクエストに対して、そのリクエストのis_doneを完了(True)にして返す
 @app.put("/api/tasks/<int:task_id>/done")
 def change_task_done(task_id):
-    task = Task.query.get(task_id)
+    task = db.session.get(Task, task_id)
     if not task:
         return jsonify({"detail": "The expected task is not found"}), 404
     
@@ -249,7 +249,7 @@ def change_task_done(task_id):
     return jsonify(task.to_dict())
 
 ##フロントエンドからタスクをデータベースに登録する
-@app.post("/api/tasks/register")
+@app.post("/api/tasks")
 def create_task():
     data = request.get_json()
     if not data or "task_name" not in data:
