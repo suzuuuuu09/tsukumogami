@@ -632,6 +632,7 @@ button:hover {
   height: min(240px, 72%);
   object-fit: cover;
   object-position: center;
+  transform: translate(-50%, -50%);
   opacity: 0.92;
   pointer-events: none;
   z-index: 0;
@@ -744,6 +745,7 @@ button:hover {
   display: grid;
   grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
   gap: 20px;
+  align-items: start;
 }
 
 .calendar-grid-wrapper {
@@ -808,10 +810,15 @@ button:hover {
 }
 
 .calendar-stamp {
+  position: absolute;
+  top: 8px;
+  right: 8px;
   width: 42px;
   height: 42px;
   object-fit: contain;
   filter: drop-shadow(1px 2px 2px rgba(79, 49, 12, 0.18));
+  transform: rotate(-12deg);
+  transform-origin: center;
 }
 
 .calendar-events {
@@ -881,7 +888,30 @@ button:hover {
   box-shadow: none;
 }
 .hanko-pop {
-  animation: hanko 0.65s ease-out;
+  animation: hanko-stamp 0.65s ease-out;
+}
+
+@keyframes hanko-stamp {
+  0% {
+    opacity: 0;
+    transform: rotate(-12deg) translateY(-10px) scale(1.5);
+    filter: drop-shadow(0 0 0 rgba(204, 53, 40, 0));
+  }
+  45% {
+    opacity: 1;
+    transform: rotate(-12deg) translateY(2px) scale(0.92);
+    filter: drop-shadow(0 0 0 rgba(204, 53, 40, 0));
+  }
+  65% {
+    opacity: 1;
+    transform: rotate(-12deg) translateY(0) scale(1.06);
+    filter: drop-shadow(0 0 18px rgba(204, 53, 40, 0.18));
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(-12deg) scale(1);
+    filter: drop-shadow(1px 2px 2px rgba(79, 49, 12, 0.18));
+  }
 }
 
 .calendar-modal-backdrop {
@@ -1040,23 +1070,20 @@ button:hover {
 }
 
 .calendar-sidebar {
-  border: 2px solid rgba(26, 21, 21, 0.2);
+  border: none;
   background:
-    linear-gradient(180deg, rgba(255, 249, 238, 0.94), rgba(234, 224, 199, 0.88)),
-    url('/japanese-paper.jpg');
-  background-size: cover, 620px auto;
-  background-position: center, center;
+    none;
   padding: 18px;
   display: grid;
   align-content: start;
   gap: 18px;
-  box-shadow: inset 0 0 0 1px rgba(130, 96, 44, 0.15);
+  box-shadow: none;
 }
 
 .calendar-sidebar h2 {
   margin: 0;
   color: var(--sumi);
-  font-size: 1.15rem;
+  font-size: 1.5rem;
   letter-spacing: 0.06em;
 }
 
@@ -1082,6 +1109,7 @@ button:hover {
     transform 0.35s ease,
     box-shadow 0.35s ease,
     border-color 0.35s ease;
+  border-radius: 24px;
 }
 
 .deadline-item::before {
@@ -1102,38 +1130,247 @@ button:hover {
 
 .deadline-card-header {
   position: relative;
-  height: 190px;
+  height: 260px;
   overflow: hidden;
   border-bottom: 2px solid rgba(68, 43, 21, 0.12);
   transition: height 0.45s cubic-bezier(0.22, 1, 0.36, 1);
-  background:
-    linear-gradient(180deg, var(--shu), rgba(0, 0, 0, 0.92)),
-    radial-gradient(circle at top right, rgba(204, 53, 40, 0.12), transparent 30%),
-    url('/japanese-paper.jpg');
 }
 
 .deadline-item:hover .deadline-card-header {
-  height: 112px;
+  height: 228px;
+}
+
+.deadline-stage {
+  position: relative;
+  width: min(100%, 260px);
+  aspect-ratio: 1;
+  margin: 18px auto 0;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 6px solid rgba(220, 120, 84, 0.95);
+  background:
+    radial-gradient(circle at 50% 36%, rgba(255, 224, 141, 0.22), transparent 28%),
+    linear-gradient(180deg, #485689 0%, #3f4d7d 62%, #d96d4a 62%, #d96d4a 100%);
+  box-shadow:
+    inset 0 0 0 3px rgba(255, 246, 232, 0.3),
+    0 16px 22px rgba(49, 33, 22, 0.16);
+}
+
+.deadline-stage-sky {
+  position: absolute;
+  inset: 0 0 34% 0;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(255,255,255,0.14) 0 1px, transparent 1px),
+    radial-gradient(circle at 64% 12%, rgba(255,255,255,0.18) 0 1px, transparent 1px),
+    radial-gradient(circle at 36% 28%, rgba(255,255,255,0.12) 0 1px, transparent 1px),
+    linear-gradient(180deg, #485689 0%, #3f4d7d 100%);
+  background-size: 92px 92px, 120px 120px, 140px 140px, auto;
+}
+
+.deadline-stage-moon {
+  position: absolute;
+  top: 16%;
+  right: 19%;
+  width: 38%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 34%, rgba(255, 252, 232, 0.86), rgba(245, 213, 122, 0.94) 55%, rgba(232, 184, 76, 0.96) 100%);
+  box-shadow: 0 0 24px rgba(252, 221, 132, 0.22);
+}
+
+.deadline-stage-cloud {
+  position: absolute;
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow:
+    36px 0 0 rgba(255, 255, 255, 0.96),
+    20px 14px 0 rgba(255, 255, 255, 0.96);
+}
+
+.deadline-stage-cloud-left {
+  top: 18%;
+  left: 8%;
+  width: 44px;
+}
+
+.deadline-stage-cloud-right {
+  top: 37%;
+  right: 18%;
+  width: 54px;
+}
+
+.deadline-stage-cloud-low {
+  top: 60%;
+  left: 18%;
+  width: 48px;
+  opacity: 0.92;
+}
+
+.deadline-stage-firefly {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border: 2px solid rgba(245, 206, 103, 0.95);
+  border-radius: 50% 50% 48% 48%;
+  transform: rotate(35deg);
+}
+
+.deadline-stage-firefly::before,
+.deadline-stage-firefly::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  width: 12px;
+  height: 2px;
+  background: rgba(245, 206, 103, 0.95);
+  border-radius: 999px;
+}
+
+.deadline-stage-firefly::before {
+  left: -11px;
+}
+
+.deadline-stage-firefly::after {
+  right: -11px;
+}
+
+.deadline-stage-firefly-left {
+  top: 42%;
+  left: 28%;
+}
+
+.deadline-stage-firefly-right {
+  top: 58%;
+  right: 34%;
+}
+
+.deadline-stage-hill {
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  border-radius: 50%;
+  background: #dc6f49;
+}
+
+.deadline-stage-hill-back {
+  bottom: 15%;
+  height: 28%;
+  transform: rotate(-4deg);
+}
+
+.deadline-stage-hill-front {
+  bottom: -2%;
+  height: 34%;
+  background: #db744d;
+  clip-path: polygon(0 40%, 22% 24%, 44% 34%, 58% 52%, 75% 34%, 100% 18%, 100% 100%, 0 100%);
+}
+
+.deadline-stage-grass {
+  position: absolute;
+  right: 16%;
+  bottom: 8%;
+  width: 28%;
+  height: 18%;
+}
+
+.deadline-stage-grass::before,
+.deadline-stage-grass::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  width: 46%;
+  height: 100%;
+  border-radius: 100% 100% 0 0;
+  border: 4px solid transparent;
+  border-top-color: rgba(255, 222, 148, 0.96);
+  border-left-color: rgba(255, 222, 148, 0.96);
+  transform: skewX(-10deg) rotate(18deg);
+}
+
+.deadline-stage-grass::after {
+  right: 0;
+  height: 78%;
+  transform: skewX(-6deg) rotate(28deg);
 }
 
 .deadline-card-image {
+  position: absolute;
+  left: 50%;
+  bottom: 15%;
+  z-index: 2;
   display: block;
-  width: 100%;
-  height: 100%;
+  width: 58%;
+  height: 58%;
   object-fit: contain;
   object-position: center;
-  padding: 18px 22px 10px;
+  padding: 0;
   filter: drop-shadow(0 14px 18px rgba(18, 15, 15, 0.28));
   background: transparent;
-  transform: scale(1);
+  transform: translateX(-50%) scale(0.92);
   transition:
     transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
     filter 0.45s ease;
 }
 
 .deadline-item:hover .deadline-card-image {
-  transform: scale(0.76) translateY(8px);
-  filter: drop-shadow(0 10px 14px rgba(18, 15, 15, 0.18));
+  transform: translateX(-50%) scale(1.02) translateY(-2px);
+  filter: drop-shadow(0 12px 20px rgba(18, 15, 15, 0.22));
+}
+
+.deadline-fusuma {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 52%;
+  z-index: 3;
+  background:
+    linear-gradient(180deg, rgba(255, 252, 245, 0.98), rgba(243, 236, 223, 0.98)),
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 16px,
+      rgba(216, 111, 74, 0.9) 16px 18px
+    );
+  box-shadow: inset 0 0 0 1px rgba(216, 111, 74, 0.35);
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.deadline-fusuma-left {
+  left: -1%;
+  border-right: 2px solid rgba(216, 111, 74, 0.7);
+}
+
+.deadline-fusuma-right {
+  right: -1%;
+  border-left: 2px solid rgba(216, 111, 74, 0.7);
+}
+
+.deadline-fusuma-handle {
+  position: absolute;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  margin-top: -6px;
+  border-radius: 50%;
+  background: rgba(216, 111, 74, 0.92);
+  box-shadow: 0 0 0 3px rgba(255, 247, 230, 0.7);
+}
+
+.deadline-fusuma-left .deadline-fusuma-handle {
+  right: 14px;
+}
+
+.deadline-fusuma-right .deadline-fusuma-handle {
+  left: 14px;
+}
+
+.deadline-item:hover .deadline-fusuma-left {
+  transform: translateX(-82%);
+}
+
+.deadline-item:hover .deadline-fusuma-right {
+  transform: translateX(82%);
 }
 
 .deadline-card-crest {
@@ -1173,16 +1410,16 @@ button:hover {
 .deadline-card-body {
   position: relative;
   z-index: 1;
-  height: 104px;
+  max-height: 100px;
   padding: 16px 18px 18px;
   display: grid;
   align-content: start;
   gap: 4px;
-  transition: height 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: max-height 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .deadline-item:hover .deadline-card-body {
-  height: 214px;
+  max-height: 100px;
 }
 
 .deadline-kicker {
@@ -1245,6 +1482,142 @@ button:hover {
   padding: 30px 20px;
   text-align: center;
   font-weight: 800;
+}
+
+.deadline-item {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+  border-radius: 0;
+}
+
+.deadline-item::before {
+  display: none;
+}
+
+.deadline-item:hover {
+  transform: translateY(-4px);
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.deadline-card-header {
+  display: none;
+}
+
+.deadline-stage {
+  width: min(100%, 430px);
+  margin: 0 auto;
+  isolation: isolate;
+}
+
+.deadline-card-crest {
+  position: absolute;
+  top: 45px;
+  right: 45px;
+  z-index: 1;
+}
+
+.deadline-card-image {
+  z-index: 2;
+  opacity: 1;
+}
+
+.deadline-fusuma-left {
+  transform: translateX(-22%);
+}
+
+.deadline-fusuma-right {
+  transform: translateX(22%);
+}
+
+.deadline-item:hover .deadline-fusuma-left {
+  transform: translateX(-82%);
+}
+
+.deadline-item:hover .deadline-fusuma-right {
+  transform: translateX(82%);
+}
+
+.deadline-card-body {
+  position: absolute;
+  left: 50%;
+  bottom: -2%;
+  z-index: 4;
+  width: 42%;
+  min-height: 0;
+  padding: 8px 10px 10px;
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 252, 246, 0.98), rgba(241, 232, 208, 0.96)),
+    url('/japanese-paper.jpg');
+  border: 1px solid rgba(130, 96, 44, 0.2);
+  box-shadow:
+    0 10px 18px rgba(49, 33, 22, 0.14),
+    inset 0 0 0 1px rgba(255, 247, 230, 0.3);
+  transform: translateX(-50%) translateY(24px) scale(0.9);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.28s ease;
+}
+
+.deadline-card-body::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -10px;
+  bottom: auto;
+  width: 18px;
+  height: 18px;
+  background: rgba(243, 235, 220, 0.98);
+  border-top: 1px solid rgba(130, 96, 44, 0.2);
+  border-left: 1px solid rgba(130, 96, 44, 0.2);
+  transform: translateX(-50%) rotate(45deg);
+  z-index: -1;
+}
+
+.deadline-item:hover .deadline-card-body {
+  transform: translateX(-50%) translateY(-6px) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.deadline-detail-button {
+  margin-top: 4px;
+  width: auto;
+  justify-self: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.08em;
+  font-size: 0.68rem;
+  background: linear-gradient(180deg, rgba(204, 53, 40, 0.96), rgba(150, 27, 16, 0.96));
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 0.25s ease,
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.2s ease;
+}
+
+.deadline-item:hover .deadline-detail-button {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.deadline-kicker {
+  text-align: center;
+  font-size: 0.56rem;
+  letter-spacing: 0.12em;
+}
+
+.deadline-date {
+  margin-bottom: 0;
+  text-align: center;
+  font-size: 0.82rem;
+  line-height: 1.25;
 }
 
 @media (max-width: 768px) {
@@ -1337,20 +1710,16 @@ button:hover {
   }
 
   .deadline-card-header {
-    height: 150px;
+    height: 224px;
   }
 
   .deadline-item:hover .deadline-card-header {
-    height: 100px;
+    height: 208px;
   }
 
   .deadline-card-body {
-    height: 96px;
-    padding: 14px;
-  }
-
-  .deadline-item:hover .deadline-card-body {
-    height: 198px;
+    width: 40%;
+    padding: 7px 8px 9px;
   }
 
   .deadline-date {
@@ -1358,12 +1727,25 @@ button:hover {
   }
 
   .deadline-card-image {
-    padding: 14px 18px 8px;
+    width: 60%;
+    height: 60%;
   }
 
   .deadline-card-crest {
     width: 56px;
     height: 56px;
+  }
+
+  .deadline-stage {
+    width: min(100%, 320px);
+    margin-top: 0;
+    border-width: 5px;
+  }
+
+  .deadline-fusuma-handle {
+    width: 10px;
+    height: 10px;
+    margin-top: -5px;
   }
 }
 
@@ -1371,4 +1753,45 @@ button:hover {
   .calendar-layout {
     grid-template-columns: 1fr;
   }
+}
+
+#container {
+    width: 100%;
+    height: auto;
+}
+
+#container > video, #container > canvas {
+    width: 100%;
+}
+#container > canvas {
+    position: absolute;
+    left: 0px; top: 0px;
+}
+
+#video {
+        width: 100%;
+        height: auto;
+}
+
+#canvas {
+        width: 100%;
+        height: auto;
+    }
+
+.deadline-card-button {
+  display: inline-block;
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0px;
+  margin: 0px;
+  color: var(--sumi);
+  font-weight: 700;
+  font-size: 0.7rem;
+}
+
+.deadline-card-button:hover {
+  color: var(--shu);
+  text-decoration: underline;
+  box-shadow: none;
 }

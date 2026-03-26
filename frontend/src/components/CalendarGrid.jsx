@@ -152,7 +152,6 @@ function CalendarGrid({ calendarMonth, itemsByDate, focusDate, onEntryComplete }
               ×
             </button>
             <div className="calendar-modal-content">
-              <p className="calendar-modal-kicker">{formatDisplayDate(overflowEntries.iso)}</p>
               <h3 className="calendar-modal-title">交換期限</h3>
               <div className="calendar-overflow-list">
                 {overflowEntries.entries.map((entry) => {
@@ -205,7 +204,6 @@ function CalendarGrid({ calendarMonth, itemsByDate, focusDate, onEntryComplete }
               </div>
             </div>
             <div className="calendar-modal-content">
-              <p className="calendar-modal-kicker">{getEntryYokai(selectedEntry)}</p>
               <h3 className="calendar-modal-title">{selectedEntry.productName}</h3>
               <p className="calendar-modal-meta">購入日: {formatDisplayDate(selectedEntry.purchaseDate)}</p>
               <p className="calendar-modal-meta">交換期限: {formatDisplayDate(selectedEntry.suggestedExpiration)}</p>

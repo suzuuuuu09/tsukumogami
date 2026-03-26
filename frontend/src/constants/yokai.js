@@ -1,6 +1,5 @@
 export const yokaiImageMap = {
   鬼: 'oni.png',
-  狛犬: 'komainu.png',
   提灯お化け: 'chouchin.png',
   招き猫: 'manekineko.png',
   傘地蔵: 'kasajizou.png',
