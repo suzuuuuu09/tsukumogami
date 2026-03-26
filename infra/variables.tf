@@ -117,11 +117,56 @@ variable "frontend_desired_count" {
   default     = 1
 }
 
-variable "dynamodb_table_name" {
-  description = "Application DynamoDB table name."
+variable "database_url" {
+  description = "SQLAlchemy database URL. Leave null to auto-generate from the EC2 DB instance."
   type        = string
   default     = null
   nullable    = true
+  sensitive   = true
+}
+
+variable "db_name" {
+  description = "PostgreSQL database name."
+  type        = string
+  default     = "app"
+}
+
+variable "db_username" {
+  description = "PostgreSQL admin username."
+  type        = string
+  default     = "postgres"
+  sensitive   = true
+}
+
+variable "db_password" {
+  description = "PostgreSQL admin password."
+  type        = string
+  sensitive   = true
+}
+
+variable "db_instance_type" {
+  description = "EC2 instance type for the DB server."
+  type        = string
+  default     = "t3.micro"
+}
+
+variable "db_volume_size" {
+  description = "Root EBS volume size (GiB) for the DB EC2 instance."
+  type        = number
+  default     = 20
+}
+
+variable "db_key_name" {
+  description = "EC2 key pair name for SSH access to the DB server."
+  type        = string
+  default     = null
+  nullable    = true
+}
+
+variable "db_ssh_allowed_cidr" {
+  description = "CIDR block allowed to SSH into the DB server."
+  type        = string
+  default     = "0.0.0.0/0"
 }
 
 variable "s3_force_destroy" {

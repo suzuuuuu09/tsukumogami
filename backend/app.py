@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
+from sqlalchemy import inspect, text
 
 load_dotenv()
 
@@ -21,14 +22,21 @@ CORS(
     resources={
         r"/api/*": {
             "origins": "*",
-            "methods": ["GET", "POST", "OPTIONS"],
+            "methods": ["GET", "POST", "PUT", "OPTIONS"],
             "allow_headers": ["Content-Type"],
         }
     },
 )
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
+database_url = os.getenv("DATABASE_URL", "sqlite:///app.db")
+if database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql+psycopg://", 1)
+elif database_url.startswith("postgresql://"):
+    database_url = database_url.replace("postgresql://", "postgresql+psycopg://", 1)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {"pool_pre_ping": True}
 db = SQLAlchemy(app)
 
 class APIError(Exception):
@@ -39,16 +47,99 @@ class APIError(Exception):
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    task_name = db.Column(db.String(100), nullable=False)
+    task_name = db.Column(db.String(255), nullable=False)
     task_date = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    barcode = db.Column(db.String(32), nullable=True)
+    purchase_date = db.Column(db.Date, nullable=True)
+    product_name = db.Column(db.String(255), nullable=True)
+    category = db.Column(db.String(120), nullable=True)
+    suggested_expiration = db.Column(db.Date, nullable=True)
+    reason = db.Column(db.Text, nullable=True)
+    product_image = db.Column(db.Text, nullable=True)
+    yokai = db.Column(db.String(64), nullable=True)
     task_is_done = db.Column(db.Boolean, default=False, nullable=False)
+    completed_at = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    updated_at = db.Column(
+        db.DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+        nullable=False,
+    )
 
     def to_dict(self):
         return {
+            "id": self.id,
+            "barcode": self.barcode,
+            "purchase_date": self.purchase_date.isoformat() if self.purchase_date else None,
+            "product_name": self.product_name or self.task_name,
+            "category": self.category,
+            "suggested_expiration": (
+                self.suggested_expiration.isoformat()
+                if self.suggested_expiration
+                else (self.task_date.date().isoformat() if self.task_date else None)
+            ),
+            "reason": self.reason,
+            "product_image": self.product_image,
+            "yokai": self.yokai,
             "task_name": self.task_name,
             "task_date": self.task_date.isoformat() if self.task_date else None,
-            "task_is_done": self.task_is_done
+            "task_is_done": self.task_is_done,
+            "completed_at": self.completed_at.isoformat() if self.completed_at else None,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }
+
+
+TASK_SCHEMA_UPDATES = {
+    "barcode": "ALTER TABLE task ADD COLUMN barcode VARCHAR(32)",
+    "purchase_date": "ALTER TABLE task ADD COLUMN purchase_date DATE",
+    "product_name": "ALTER TABLE task ADD COLUMN product_name VARCHAR(255)",
+    "category": "ALTER TABLE task ADD COLUMN category VARCHAR(120)",
+    "suggested_expiration": "ALTER TABLE task ADD COLUMN suggested_expiration DATE",
+    "reason": "ALTER TABLE task ADD COLUMN reason TEXT",
+    "product_image": "ALTER TABLE task ADD COLUMN product_image TEXT",
+    "yokai": "ALTER TABLE task ADD COLUMN yokai VARCHAR(64)",
+    "completed_at": "ALTER TABLE task ADD COLUMN completed_at TIMESTAMP",
+    "created_at": "ALTER TABLE task ADD COLUMN created_at TIMESTAMP",
+    "updated_at": "ALTER TABLE task ADD COLUMN updated_at TIMESTAMP",
+}
+
+
+def ensure_task_schema() -> None:
+    with app.app_context():
+        inspector = inspect(db.engine)
+        if "task" not in inspector.get_table_names():
+            db.create_all()
+            return
+
+        existing_columns = {column["name"] for column in inspector.get_columns("task")}
+        added_columns = False
+
+        for column_name, ddl in TASK_SCHEMA_UPDATES.items():
+            if column_name in existing_columns:
+                continue
+
+            db.session.execute(text(ddl))
+            added_columns = True
+
+        if added_columns:
+            now = datetime.now(timezone.utc).isoformat()
+            db.session.execute(
+                text(
+                    """
+                    UPDATE task
+                    SET created_at = COALESCE(created_at, task_date, :now),
+                        updated_at = COALESCE(updated_at, task_date, :now),
+                        product_name = COALESCE(product_name, task_name)
+                    """
+                ),
+                {"now": now},
+            )
+            db.session.commit()
+
+
+ensure_task_schema()
 
 
 @app.errorhandler(APIError)
@@ -80,6 +171,16 @@ def parse_purchase_date(value: str | None) -> date:
         return date.fromisoformat(value)
     except ValueError as exc:
         raise APIError(400, "purchase_date must be in YYYY-MM-DD format") from exc
+
+
+def parse_required_date(value: str | None, field_name: str) -> date:
+    if not value:
+        raise APIError(400, f"{field_name} is required")
+
+    try:
+        return date.fromisoformat(value)
+    except ValueError as exc:
+        raise APIError(400, f"{field_name} must be in YYYY-MM-DD format") from exc
 
 
 def guess_category(product_name: str, product_description: str | None) -> str:
@@ -230,7 +331,7 @@ def health():
 ##リクエストに対してデータベースを'全件'返す（要修正)
 @app.get("/api/tasks") 
 def get_tasks():
-    tasks = Task.query.all()
+    tasks = Task.query.order_by(Task.suggested_expiration.is_(None), Task.suggested_expiration.asc(), Task.id.desc()).all()
     result = [task.to_dict() for task in tasks]
 
     return jsonify(result)
@@ -243,6 +344,7 @@ def change_task_done(task_id):
         return jsonify({"detail": "The expected task is not found"}), 404
     
     task.task_is_done = True
+    task.completed_at = datetime.now(timezone.utc)
     
     db.session.commit()
     
@@ -251,11 +353,33 @@ def change_task_done(task_id):
 ##フロントエンドからタスクをデータベースに登録する
 @app.post("/api/tasks")
 def create_task():
-    data = request.get_json()
-    if not data or "task_name" not in data:
-        return jsonify({"detail": "Please contain the item 'task_name'"}), 400
-    
-    new_task = Task(task_name=data["task_name"])
+    data = request.get_json(silent=True) or {}
+    required_fields = [
+        "barcode",
+        "purchase_date",
+        "product_name",
+        "category",
+        "suggested_expiration",
+        "reason",
+        "yokai",
+    ]
+    missing_fields = [field for field in required_fields if not str(data.get(field, "")).strip()]
+    if missing_fields:
+        return jsonify({"detail": f"Missing required fields: {', '.join(missing_fields)}"}), 400
+
+    product_name = str(data["product_name"]).strip()
+    new_task = Task(
+        task_name=product_name,
+        barcode=str(data["barcode"]).strip(),
+        purchase_date=parse_required_date(data.get("purchase_date"), "purchase_date"),
+        product_name=product_name,
+        category=str(data["category"]).strip(),
+        suggested_expiration=parse_required_date(data.get("suggested_expiration"), "suggested_expiration"),
+        reason=str(data["reason"]).strip(),
+        product_image=str(data.get("product_image") or "").strip() or None,
+        yokai=str(data["yokai"]).strip(),
+        task_date=datetime.now(timezone.utc),
+    )
 
     db.session.add(new_task)
     db.session.commit()

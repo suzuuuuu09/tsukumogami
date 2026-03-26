@@ -52,7 +52,14 @@ jobs:
           SECRET_VPC_CIDR: ${{ secrets.TF_VAR_VPC_CIDR }}
           SECRET_PUBLIC_SUBNET_CIDRS: ${{ secrets.TF_VAR_PUBLIC_SUBNET_CIDRS }}
           SECRET_PRIVATE_SUBNET_CIDRS: ${{ secrets.TF_VAR_PRIVATE_SUBNET_CIDRS }}
-          SECRET_DYNAMODB_TABLE_NAME: ${{ secrets.TF_VAR_DYNAMODB_TABLE_NAME }}
+          SECRET_DATABASE_URL: ${{ secrets.TF_VAR_DATABASE_URL }}
+          SECRET_DB_NAME: ${{ secrets.TF_VAR_DB_NAME }}
+          SECRET_DB_USERNAME: ${{ secrets.TF_VAR_DB_USERNAME }}
+          SECRET_DB_PASSWORD: ${{ secrets.TF_VAR_DB_PASSWORD }}
+          SECRET_DB_INSTANCE_TYPE: ${{ secrets.TF_VAR_DB_INSTANCE_TYPE }}
+          SECRET_DB_VOLUME_SIZE: ${{ secrets.TF_VAR_DB_VOLUME_SIZE }}
+          SECRET_DB_KEY_NAME: ${{ secrets.TF_VAR_DB_KEY_NAME }}
+          SECRET_DB_SSH_ALLOWED_CIDR: ${{ secrets.TF_VAR_DB_SSH_ALLOWED_CIDR }}
           SECRET_YAHOO_APP_ID: ${{ secrets.TF_VAR_YAHOO_APP_ID }}
           SECRET_GEMINI_API_KEY: ${{ secrets.TF_VAR_GEMINI_API_KEY }}
           SECRET_GITHUB_OWNER: ${{ secrets.TF_VAR_GITHUB_OWNER }}
@@ -78,7 +85,14 @@ jobs:
           export_if_set TF_VAR_vpc_cidr "$SECRET_VPC_CIDR"
           export_if_set TF_VAR_public_subnet_cidrs "$SECRET_PUBLIC_SUBNET_CIDRS"
           export_if_set TF_VAR_private_subnet_cidrs "$SECRET_PRIVATE_SUBNET_CIDRS"
-          export_if_set TF_VAR_dynamodb_table_name "$SECRET_DYNAMODB_TABLE_NAME"
+          export_if_set TF_VAR_database_url "$SECRET_DATABASE_URL"
+          export_if_set TF_VAR_db_name "$SECRET_DB_NAME"
+          export_if_set TF_VAR_db_username "$SECRET_DB_USERNAME"
+          export_if_set TF_VAR_db_password "$SECRET_DB_PASSWORD"
+          export_if_set TF_VAR_db_instance_type "$SECRET_DB_INSTANCE_TYPE"
+          export_if_set TF_VAR_db_volume_size "$SECRET_DB_VOLUME_SIZE"
+          export_if_set TF_VAR_db_key_name "$SECRET_DB_KEY_NAME"
+          export_if_set TF_VAR_db_ssh_allowed_cidr "$SECRET_DB_SSH_ALLOWED_CIDR"
           export_if_set TF_VAR_yahoo_app_id "$SECRET_YAHOO_APP_ID"
           export_if_set TF_VAR_gemini_api_key "$SECRET_GEMINI_API_KEY"
           export_if_set TF_VAR_github_owner "$SECRET_GITHUB_OWNER"
@@ -288,7 +302,14 @@ jobs:
           SECRET_VPC_CIDR: ${{ secrets.TF_VAR_VPC_CIDR }}
           SECRET_PUBLIC_SUBNET_CIDRS: ${{ secrets.TF_VAR_PUBLIC_SUBNET_CIDRS }}
           SECRET_PRIVATE_SUBNET_CIDRS: ${{ secrets.TF_VAR_PRIVATE_SUBNET_CIDRS }}
-          SECRET_DYNAMODB_TABLE_NAME: ${{ secrets.TF_VAR_DYNAMODB_TABLE_NAME }}
+          SECRET_DATABASE_URL: ${{ secrets.TF_VAR_DATABASE_URL }}
+          SECRET_DB_NAME: ${{ secrets.TF_VAR_DB_NAME }}
+          SECRET_DB_USERNAME: ${{ secrets.TF_VAR_DB_USERNAME }}
+          SECRET_DB_PASSWORD: ${{ secrets.TF_VAR_DB_PASSWORD }}
+          SECRET_DB_INSTANCE_TYPE: ${{ secrets.TF_VAR_DB_INSTANCE_TYPE }}
+          SECRET_DB_VOLUME_SIZE: ${{ secrets.TF_VAR_DB_VOLUME_SIZE }}
+          SECRET_DB_KEY_NAME: ${{ secrets.TF_VAR_DB_KEY_NAME }}
+          SECRET_DB_SSH_ALLOWED_CIDR: ${{ secrets.TF_VAR_DB_SSH_ALLOWED_CIDR }}
           SECRET_YAHOO_APP_ID: ${{ secrets.TF_VAR_YAHOO_APP_ID }}
           SECRET_GEMINI_API_KEY: ${{ secrets.TF_VAR_GEMINI_API_KEY }}
           SECRET_GITHUB_OWNER: ${{ secrets.TF_VAR_GITHUB_OWNER }}
@@ -314,7 +335,14 @@ jobs:
           export_if_set TF_VAR_vpc_cidr "$SECRET_VPC_CIDR"
           export_if_set TF_VAR_public_subnet_cidrs "$SECRET_PUBLIC_SUBNET_CIDRS"
           export_if_set TF_VAR_private_subnet_cidrs "$SECRET_PRIVATE_SUBNET_CIDRS"
-          export_if_set TF_VAR_dynamodb_table_name "$SECRET_DYNAMODB_TABLE_NAME"
+          export_if_set TF_VAR_database_url "$SECRET_DATABASE_URL"
+          export_if_set TF_VAR_db_name "$SECRET_DB_NAME"
+          export_if_set TF_VAR_db_username "$SECRET_DB_USERNAME"
+          export_if_set TF_VAR_db_password "$SECRET_DB_PASSWORD"
+          export_if_set TF_VAR_db_instance_type "$SECRET_DB_INSTANCE_TYPE"
+          export_if_set TF_VAR_db_volume_size "$SECRET_DB_VOLUME_SIZE"
+          export_if_set TF_VAR_db_key_name "$SECRET_DB_KEY_NAME"
+          export_if_set TF_VAR_db_ssh_allowed_cidr "$SECRET_DB_SSH_ALLOWED_CIDR"
           export_if_set TF_VAR_yahoo_app_id "$SECRET_YAHOO_APP_ID"
           export_if_set TF_VAR_gemini_api_key "$SECRET_GEMINI_API_KEY"
           export_if_set TF_VAR_github_owner "$SECRET_GITHUB_OWNER"

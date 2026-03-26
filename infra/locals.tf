@@ -22,11 +22,17 @@ locals {
     var.tags
   )
 
+  # database_url が明示的に指定されていればそれを使い、なければ EC2 DB から自動生成
+  database_url = coalesce(
+    var.database_url,
+    "postgresql://${var.db_username}:${var.db_password}@${aws_instance.db.private_ip}:5432/${var.db_name}"
+  )
+
   backend_environment = [
     { name = "PORT", value = tostring(var.backend_container_port) },
     { name = "YAHOO_APP_ID", value = var.yahoo_app_id },
     { name = "GEMINI_API_KEY", value = var.gemini_api_key },
-    { name = "DYNAMODB_TABLE_NAME", value = aws_dynamodb_table.app_data.name },
+    { name = "DATABASE_URL", value = local.database_url },
     { name = "APP_BUCKET", value = aws_s3_bucket.app_storage.bucket },
     { name = "AWS_REGION", value = var.aws_region }
   ]

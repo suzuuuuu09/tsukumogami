@@ -66,8 +66,8 @@ function CalendarGrid({ calendarMonth, itemsByDate, focusDate, onEntryComplete }
     setSelectedEntry(entry)
   }
 
-  const handleComplete = (entry) => {
-    onEntryComplete(entry.id)
+  const handleComplete = async (entry) => {
+    await onEntryComplete(entry.id)
     setSelectedEntry(null)
   }
 

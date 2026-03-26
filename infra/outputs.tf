@@ -28,11 +28,6 @@ output "backend_service_name" {
   description = "ECS backend service name."
 }
 
-output "dynamodb_table_name" {
-  value       = aws_dynamodb_table.app_data.name
-  description = "DynamoDB table name used by the application."
-}
-
 output "pipeline_name" {
   value       = aws_codepipeline.main.name
   description = "CodePipeline name."
@@ -61,4 +56,22 @@ output "cloudfront_distribution_id" {
 output "codestar_connection_arn" {
   value       = aws_codestarconnections_connection.github.arn
   description = "CodeStar connection ARN. Complete the GitHub handshake in the AWS console after apply."
+}
+
+# ── DB EC2 ──
+
+output "db_instance_id" {
+  value       = aws_instance.db.id
+  description = "EC2 instance ID of the PostgreSQL DB server."
+}
+
+output "db_private_ip" {
+  value       = aws_instance.db.private_ip
+  description = "Private IP address of the DB server."
+}
+
+output "database_url" {
+  value       = local.database_url
+  description = "PostgreSQL connection URL used by the backend."
+  sensitive   = true
 }

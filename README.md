@@ -15,6 +15,7 @@ Local endpoints:
 - Frontend: `http://localhost:5173`
 - Backend: `http://localhost:5002`
 - Health check: `http://localhost:5002/health`
+- PostgreSQL: `localhost:5432`
 
 ## Terraform Infrastructure
 
@@ -23,7 +24,6 @@ The `infra` directory provisions the following AWS resources with Terraform:
 - VPC with public and private subnets
 - ECS Fargate cluster, services, and NLB
 - ECR repositories for frontend and backend images
-- DynamoDB
 - S3 buckets for pipeline artifacts and app storage
 - CloudWatch log groups
 - CodeBuild and CodePipeline for CI/CD
@@ -77,7 +77,7 @@ BACKEND_CONFIG_FILE=./infra/backend.hcl ./scripts/deploy_infra.sh apply
 ### Important notes
 
 - After Terraform creates the CodeStar connection, complete the GitHub connection handshake in the AWS console before the pipeline can pull source code.
-- The backend task definition receives DynamoDB, S3, Yahoo API, and Gemini API settings from Terraform variables.
+- The backend task definition receives `DATABASE_URL`, S3, Yahoo API, and Gemini API settings from Terraform variables.
 - The NLB exposes the frontend on port `443` with TLS termination and the backend on port `5002` with TLS as well.
 - HTTPS requires a public Route 53 hosted zone plus an application hostname that you control. Terraform now provisions ACM DNS validation and a Route 53 alias for that hostname.
 - Because NLB does not support path-based routing, the production frontend build is configured to call the backend on the same application hostname with port `5002`.
@@ -126,7 +126,7 @@ Configure these repository secrets:
 - `TF_VAR_VPC_CIDR`
 - `TF_VAR_PUBLIC_SUBNET_CIDRS`
 - `TF_VAR_PRIVATE_SUBNET_CIDRS`
-- `TF_VAR_DYNAMODB_TABLE_NAME`
+- `TF_VAR_DATABASE_URL`
 - `TF_VAR_YAHOO_APP_ID`
 - `TF_VAR_GEMINI_API_KEY`
 - `TF_VAR_GITHUB_OWNER`

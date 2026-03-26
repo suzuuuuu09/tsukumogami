@@ -38,21 +38,6 @@ data "aws_iam_policy_document" "ecs_task_policy" {
     ]
   }
 
-  statement {
-    actions = [
-      "dynamodb:BatchGetItem",
-      "dynamodb:DeleteItem",
-      "dynamodb:GetItem",
-      "dynamodb:PutItem",
-      "dynamodb:Query",
-      "dynamodb:Scan",
-      "dynamodb:UpdateItem"
-    ]
-    resources = [
-      aws_dynamodb_table.app_data.arn,
-      "${aws_dynamodb_table.app_data.arn}/index/*"
-    ]
-  }
 }
 
 resource "aws_iam_role_policy" "ecs_task" {

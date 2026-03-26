@@ -6,14 +6,13 @@ import { getRandomYokai, yokaiList } from './constants/yokai'
 import CalendarPage from './pages/CalendarPage'
 import RegisterPage from './pages/RegisterPage'
 import {
-  createSavedEntry,
   getItemsByDate,
   getMonthlyEntries,
   getUpcomingEntry,
 } from './utils/entries'
 import { getInitialCalendarMonth, parseISODate, toISODate } from './utils/date'
-import { loadSavedEntries, saveSavedEntries } from './utils/storage'
 import { requestExpirationEstimate } from './api/estimateApi'
+import { completeTask, createTask, fetchTasks } from './api/tasksApi'
 
 function App() {
   const [barcode, setBarcode] = useState('')
@@ -25,7 +24,7 @@ function App() {
   const [resultYokai, setResultYokai] = useState(yokaiList[0])
   const [activePage, setActivePage] = useState('register')
   const [calendarMonth, setCalendarMonth] = useState(getInitialCalendarMonth)
-  const [savedEntries, setSavedEntries] = useState(loadSavedEntries)
+  const [savedEntries, setSavedEntries] = useState([])
   const [calendarFocusDate, setCalendarFocusDate] = useState(null)
 
   useEffect(() => {
@@ -37,8 +36,27 @@ function App() {
   }, [])
 
   useEffect(() => {
-    saveSavedEntries(savedEntries)
-  }, [savedEntries])
+    let isMounted = true
+
+    const loadTasks = async () => {
+      try {
+        const tasks = await fetchTasks()
+        if (isMounted) {
+          setSavedEntries(tasks)
+        }
+      } catch (loadError) {
+        if (isMounted) {
+          setError(loadError.message || 'タスクの読み込みに失敗しました')
+        }
+      }
+    }
+
+    loadTasks()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   useEffect(() => {
     setBarcode('')
@@ -72,9 +90,15 @@ function App() {
 
     try {
       const estimate = await requestExpirationEstimate({ barcode, purchaseDate })
+      const createdTask = await createTask({
+        barcode,
+        purchaseDate,
+        estimate,
+        yokai: newYokai,
+      })
 
       setResult(estimate)
-      setSavedEntries((prev) => [createSavedEntry({ barcode, purchaseDate, estimate, yokai: newYokai }), ...prev])
+      setSavedEntries((prev) => [createdTask, ...prev])
       setCalendarFocusDate(estimate.suggested_expiration)
 
       const expirationDate = parseISODate(estimate.suggested_expiration)
@@ -86,18 +110,16 @@ function App() {
     }
   }
 
-  const handleEntryComplete = (entryId) => {
-    setSavedEntries((prev) =>
-      prev.map((entry) =>
-        entry.id === entryId
-          ? {
-              ...entry,
-              completed: true,
-              completedAt: toISODate(new Date()),
-            }
-          : entry,
-      ),
-    )
+  const handleEntryComplete = async (entryId) => {
+    try {
+      const completedTask = await completeTask(entryId)
+      setSavedEntries((prev) =>
+        prev.map((entry) => (entry.id === entryId ? completedTask : entry)),
+      )
+    } catch (completionError) {
+      setError(completionError.message || 'タスクの完了更新に失敗しました')
+      throw completionError
+    }
   }
 
   const itemsByDate = getItemsByDate(savedEntries)
