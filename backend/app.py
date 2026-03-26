@@ -37,6 +37,19 @@ class APIError(Exception):
         self.status_code = status_code
         self.detail = detail
 
+class Task(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    task_name = db.Column(db.string(100), nullable=False)
+    task_date = db.column(db.DataTime, default=lambda: datetime.now(timezone.utc))
+    task_is_done = db.Column(db.Boolean, default=False, nullable=False)
+
+    def to_dict(self):
+        return {
+            "task_name": self.task_name,
+            "task_date": self.task_date.isoformat() if self.task_date else None,
+            "task_is_done": self.task_is_done
+        }
+
 
 @app.errorhandler(APIError)
 def handle_api_error(error: APIError):
