@@ -36,7 +36,7 @@ function MonthlyDeadlineList({ calendarMonth, monthlyEntries }) {
                     <img className="deadline-card-image" src={`/${yokaiImageMap[yokai]}`} alt={yokai} />
 
                     <div className="deadline-card-body">
-                      <p style={{fontSize: '0.7rem', fontWeight: '700', padding: '0px', margin: '0px'}}>{`交換期限は`}<br/><span style={{fontSize: '0.8rem', fontWeight: '700', color: 'var(--shu)'}}>{formatDisplayDate(entry.suggestedExpiration)}</span>{`だよ`}</p>
+                      <p style={{fontSize: '0.7rem', fontWeight: '700', padding: '0px', margin: '0px'}}>{`交換期限は`}<br/><span style={{fontSize: '0.8rem', fontWeight: '700', color: 'var(--shu)'}}>{formatDisplayDate(entry.suggestedExpiration)}</span><br/>{`だよ`}</p>
                       <button
                         type="button"
                         className="deadline-card-button"

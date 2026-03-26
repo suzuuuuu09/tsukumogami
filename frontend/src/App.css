@@ -831,8 +831,9 @@ button:hover {
 }
 
 .calendar-yokai-button {
+  justify-content: flex-start;
   margin: 0;
-  width: 100%;
+  width: 3vw;
   padding: 6px;
   border: none;
   background:
@@ -841,6 +842,13 @@ button:hover {
   color: var(--sumi);
   box-shadow: none;
   letter-spacing: 0;
+}
+
+@media (max-width: 768px) {
+  .calendar-yokai-button {
+    width: 5.5vw;
+    padding: 4px;
+  }
 }
 
 .calendar-yokai-button:hover {
@@ -1572,7 +1580,7 @@ button:hover {
   bottom: auto;
   width: 18px;
   height: 18px;
-  background: rgba(243, 235, 220, 0.98);
+  background: rgba(255, 252, 246, 0.98);
   border-top: 1px solid rgba(130, 96, 44, 0.2);
   border-left: 1px solid rgba(130, 96, 44, 0.2);
   transform: translateX(-50%) rotate(45deg);
