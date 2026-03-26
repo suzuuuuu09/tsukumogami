@@ -153,7 +153,7 @@ variable "db_instance_type" {
 variable "db_volume_size" {
   description = "Root EBS volume size (GiB) for the DB EC2 instance."
   type        = number
-  default     = 20
+  default     = 30
 }
 
 variable "db_key_name" {
