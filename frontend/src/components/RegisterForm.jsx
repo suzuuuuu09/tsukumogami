@@ -177,7 +177,7 @@ function RegisterForm({
 
   return (
     <div className="form">
-      <label htmlFor="barcode">バーコード（JAN / UPC）</label>
+      <label htmlFor="barcode">バーコード（JANコード）</label>
       {!scannerMessage ?( <small style={{ color: "#cc3528", fontSize: "0.8rem", fontWeight: "700" }}>カメラで読み取れない場合は手入力してください</small>
         ) : (
           <small style={{ color: "#5c3066", fontSize: "0.8rem", fontWeight: "700" }}>{scannerMessage}</small>
