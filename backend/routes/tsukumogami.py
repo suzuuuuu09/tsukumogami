@@ -60,4 +60,4 @@ def update_tsukumogami_has(tsukumogami_id: str):
         if tsukumogami["id"] == tsukumogami_id:
             tsukumogami["has"] = not tsukumogami.get("has", False)
             return {"tsukumogami": tsukumogami}
-    return {"error": "付喪神が見つかりませんでした"}, 404
+    return {"detail": "付喪神が見つかりませんでした"}, 404
