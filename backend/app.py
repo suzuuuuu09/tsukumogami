@@ -1,19 +1,22 @@
 import os
-from datetime import date, timedelta
+from datetime import (
+    date,
+    datetime,
+    timedelta,
+    timezone,
+)
 
 import cv2
 import numpy as np
 import requests
-from pyzbar.pyzbar import decode
-from datetime import date, timedelta, datetime, timezone
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request
-from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
 from pyzbar.pyzbar import decode
+from sqlalchemy import inspect, text
 
 from routes.tsukumogami import tsukumogami_bp
-from sqlalchemy import inspect, text
 
 load_dotenv()
 
@@ -42,16 +45,18 @@ if database_url.startswith("postgres://"):
 elif database_url.startswith("postgresql://"):
     database_url = database_url.replace("postgresql://", "postgresql+psycopg://", 1)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = database_url
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config["SQLALCHEMY_DATABASE_URI"] = database_url
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {"pool_pre_ping": True}
 db = SQLAlchemy(app)
+
 
 class APIError(Exception):
     def __init__(self, status_code: int, detail: str) -> None:
         super().__init__(detail)
         self.status_code = status_code
         self.detail = detail
+
 
 class Task(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -67,7 +72,9 @@ class Task(db.Model):
     yokai = db.Column(db.String(64), nullable=True)
     task_is_done = db.Column(db.Boolean, default=False, nullable=False)
     completed_at = db.Column(db.DateTime, nullable=True)
-    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    created_at = db.Column(
+        db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
+    )
     updated_at = db.Column(
         db.DateTime,
         default=lambda: datetime.now(timezone.utc),
@@ -75,11 +82,21 @@ class Task(db.Model):
         nullable=False,
     )
 
+    def __init__(self, **kwargs) -> None:
+        """
+        task_nameが指定されていない場合、product_nameをtask_nameとして使用する初期化処理
+        """
+        super().__init__(**kwargs)
+        if not self.task_name and self.product_name:
+            self.task_name = self.product_name
+
     def to_dict(self):
         return {
             "id": self.id,
             "barcode": self.barcode,
-            "purchase_date": self.purchase_date.isoformat() if self.purchase_date else None,
+            "purchase_date": self.purchase_date.isoformat()
+            if self.purchase_date
+            else None,
             "product_name": self.product_name or self.task_name,
             "category": self.category,
             "suggested_expiration": (
@@ -93,7 +110,9 @@ class Task(db.Model):
             "task_name": self.task_name,
             "task_date": self.task_date.isoformat() if self.task_date else None,
             "task_is_done": self.task_is_done,
-            "completed_at": self.completed_at.isoformat() if self.completed_at else None,
+            "completed_at": self.completed_at.isoformat()
+            if self.completed_at
+            else None,
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }
@@ -341,13 +360,19 @@ def root():
 def health():
     return jsonify({"status": "ok"})
 
+
 ##リクエストに対してデータベースを'全件'返す（要修正)
-@app.get("/api/tasks") 
+@app.get("/api/tasks")
 def get_tasks():
-    tasks = Task.query.order_by(Task.suggested_expiration.is_(None), Task.suggested_expiration.asc(), Task.id.desc()).all()
+    tasks = Task.query.order_by(
+        Task.suggested_expiration.is_(None),
+        Task.suggested_expiration.asc(),
+        Task.id.desc(),
+    ).all()
     result = [task.to_dict() for task in tasks]
 
     return jsonify(result)
+
 
 ##特定のタスクのリクエストに対して、そのリクエストのis_doneを完了(True)にして返す
 @app.put("/api/tasks/<int:task_id>/done")
@@ -355,13 +380,14 @@ def change_task_done(task_id):
     task = db.session.get(Task, task_id)
     if not task:
         return jsonify({"detail": "The expected task is not found"}), 404
-    
+
     task.task_is_done = True
     task.completed_at = datetime.now(timezone.utc)
-    
+
     db.session.commit()
-    
+
     return jsonify(task.to_dict())
+
 
 ##フロントエンドからタスクをデータベースに登録する
 @app.post("/api/tasks")
@@ -376,9 +402,13 @@ def create_task():
         "reason",
         "yokai",
     ]
-    missing_fields = [field for field in required_fields if not str(data.get(field, "")).strip()]
+    missing_fields = [
+        field for field in required_fields if not str(data.get(field, "")).strip()
+    ]
     if missing_fields:
-        return jsonify({"detail": f"Missing required fields: {', '.join(missing_fields)}"}), 400
+        return jsonify(
+            {"detail": f"Missing required fields: {', '.join(missing_fields)}"}
+        ), 400
 
     product_name = str(data["product_name"]).strip()
     new_task = Task(
@@ -387,7 +417,9 @@ def create_task():
         purchase_date=parse_required_date(data.get("purchase_date"), "purchase_date"),
         product_name=product_name,
         category=str(data["category"]).strip(),
-        suggested_expiration=parse_required_date(data.get("suggested_expiration"), "suggested_expiration"),
+        suggested_expiration=parse_required_date(
+            data.get("suggested_expiration"), "suggested_expiration"
+        ),
         reason=str(data["reason"]).strip(),
         product_image=str(data.get("product_image") or "").strip() or None,
         yokai=str(data["yokai"]).strip(),
